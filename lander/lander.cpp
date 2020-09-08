@@ -19,13 +19,13 @@ void autopilot (void)
 {
   // INSERT YOUR CODE HERE
   
-//  // Deploy parachute if lander under 70km and safe to deploy
-//  if (parachute_status == NOT_DEPLOYED && safe_to_deploy_parachute() && altitude < 70000){
-//    parachute_status = DEPLOYED;
-//  }
-//
-//  // Enable altitude stabilisation
-//  stabilized_attitude = true;
+  // Deploy parachute if lander under 70km and safe to deploy
+  if (parachute_status == NOT_DEPLOYED && safe_to_deploy_parachute() && altitude < 70000){
+    parachute_status = DEPLOYED;
+  }
+
+  // Enable altitude stabilisation
+  stabilized_attitude = true;
   
   // Calculate error term
   double error = -(0.5 + K_h * altitude + (velocity * position.norm()));
@@ -94,6 +94,9 @@ void numerical_dynamics (void)
 //  position = position + delta_t * velocity;
 //  velocity = velocity + delta_t * acceleration;
   
+  // Calculate the attitude of the lander w.r.t. the position vector
+//  stabilized_attitude_angle = / ;
+  
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled) autopilot();
 
@@ -118,7 +121,7 @@ void initialize_simulation (void)
   scenario_description[3] = "polar launch at escape velocity (but drag prevents escape)";
   scenario_description[4] = "elliptical orbit that clips the atmosphere and decays";
   scenario_description[5] = "descent from 200km";
-  scenario_description[6] = "";
+  scenario_description[6] = "aerostationary orbit";
   scenario_description[7] = "";
   scenario_description[8] = "";
   scenario_description[9] = "";
@@ -194,14 +197,14 @@ void initialize_simulation (void)
     break;
 
   case 6:
-//    // a circular equitorial orbit where the period of orbit is the same as the orbital period of Mars on its axis of rotation
-//      position = vector3d(20428000.0, 0.0, 0.0);
-//      velocity = vector3d(0.0, 1448.155346, 0.0);
-//    orientation = vector3d(0.0, 0.0, 90.0);
-//    delta_t = 0.1;
-//    parachute_status = NOT_DEPLOYED;
-//    stabilized_attitude = true;
-//    autopilot_enabled = false;
+    // a circular equitorial orbit where the period of orbit is the same as the orbital period of Mars on its axis of rotation
+    position = vector3d(20428000.0, 0.0, 0.0);
+    velocity = vector3d(0.0, 1448.155346, 0.0);
+    orientation = vector3d(0.0, 0.0, 90.0);
+    delta_t = 0.1;
+    parachute_status = NOT_DEPLOYED;
+    stabilized_attitude = true;
+    autopilot_enabled = false;
     break;
 
   case 7:

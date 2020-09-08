@@ -29,6 +29,7 @@
 #include <sstream>
 #include <fstream>
 #include <cmath>
+#include <math.h>
 #include <cstdlib>
 
 // GLUT mouse wheel operations work under Linux only
@@ -223,7 +224,7 @@ void glut_print (float x, float y, string s);
 double atmospheric_density (vector3d pos);
 void draw_dial (double cx, double cy, double val, string title, string units);
 void draw_control_bar (double tlx, double tly, double val, double red, double green, double blue, string title);
-void draw_indicator_lamp (double tcx, double tcy, string off_text, string on_text, bool on);
+void draw_indicator_lamp (double tcx, double tcy, string off_text, string on_text, bool on, string extra_text);
 void draw_instrument_window (void);
 void display_help_arrows (void);
 void display_help_prompt (void);

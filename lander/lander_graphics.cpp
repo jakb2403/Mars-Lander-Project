@@ -651,7 +651,7 @@ void draw_control_bar (double tlx, double tly, double val, double red, double gr
   glut_print(tlx, tly-40, title);
 }
 
-void draw_indicator_lamp (double tcx, double tcy, string off_text, string on_text, bool on)
+void draw_indicator_lamp (double tcx, double tcy, string off_text, string on_text, bool on, string extra_text = "")
   // Draws indicator lamp, top centre (tcx, tcy), appropriate text and background colour depending on on/off
 {
   if (on) glColor3f(0.5, 0.0, 0.0);
@@ -669,8 +669,8 @@ void draw_indicator_lamp (double tcx, double tcy, string off_text, string on_tex
   glVertex2d(tcx+75.0, tcy);
   glVertex2d(tcx-75.0, tcy);
   glEnd();
-  if (on) glut_print(tcx-70.0, tcy-14.0, on_text);
-  else glut_print(tcx-70.0, tcy-14.0, off_text);
+  if (on) glut_print(tcx-70.0, tcy-14.0, on_text + extra_text);
+  else glut_print(tcx-70.0, tcy-14.0, off_text + extra_text);
 }
 
 void draw_instrument_window (void)
@@ -693,8 +693,8 @@ void draw_instrument_window (void)
   else draw_dial (view_width+GAP-150, INSTRUMENT_HEIGHT/2, landed ? 0.0 : -climb_speed, "Descent rate", "m/s");
 
   // Draw attitude stabilizer lamp
-  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Attitude stabilizer off", "Attitude stabilizer on", stabilized_attitude);
-
+  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, (" | angle=" + to_string(stabilized_attitude_angle)));
+  
   // Draw ground speed meter
   draw_dial (view_width+GAP+100, INSTRUMENT_HEIGHT/2, landed ? 0.0 : ground_speed, "Ground speed", "m/s");
 
@@ -848,21 +848,23 @@ void display_help_text (void)
 
   glut_print(20, view_height-70, "Up arrow - more thrust");
   glut_print(20, view_height-85, "Down arrow - less thrust");
+  glut_print(20, view_height-100, "< - Decrease stabilized attitude angle");
+  glut_print(20, view_height-115, "> - Increase stabilized attitude angle");
+  
+  glut_print(20, view_height-130, "Keys 0-9 - restart simulation in scenario n");
 
-  glut_print(20, view_height-105, "Keys 0-9 - restart simulation in scenario n");
+  glut_print(20, view_height-145, "Left mouse - rotate 3D views");
+  glut_print(20, view_height-160, "Middle/shift mouse or up wheel - zoom in 3D views");
+  glut_print(20, view_height-175, "Right mouse or down wheel - zoom out 3D views");
 
-  glut_print(20, view_height-125, "Left mouse - rotate 3D views");
-  glut_print(20, view_height-140, "Middle/shift mouse or up wheel - zoom in 3D views");
-  glut_print(20, view_height-155, "Right mouse or down wheel - zoom out 3D views");
+  glut_print(20, view_height-195, "s - toggle attitude stabilizer");
+  glut_print(20, view_height-210, "p - deploy parachute");
+  glut_print(20, view_height-225, "a - toggle autopilot");
 
-  glut_print(20, view_height-175, "s - toggle attitude stabilizer");
-  glut_print(20, view_height-190, "p - deploy parachute");
-  glut_print(20, view_height-205, "a - toggle autopilot");
-
-  glut_print(20, view_height-225, "l - toggle lighting model");
-  glut_print(20, view_height-240, "t - toggle terrain texture");
-  glut_print(20, view_height-255, "h - toggle help");
-  glut_print(20, view_height-270, "Esc/q - quit");
+  glut_print(20, view_height-245, "l - toggle lighting model");
+  glut_print(20, view_height-260, "t - toggle terrain texture");
+  glut_print(20, view_height-275, "h - toggle help");
+  glut_print(20, view_height-290, "Esc/q - quit");
 
   j = 0;
   for (i=0; i<10; i++) {
@@ -1584,10 +1586,11 @@ void update_visualization (void)
 void attitude_stabilization (void)
   // Three-axis stabilization to ensure the lander's base is always pointing downwards 
 {
-  vector3d up, left, out;
+  vector3d up, left, out, perp;
   double m[16];
-
-  up = position.norm(); // this is the direction we want the lander's nose to point in
+  
+  perp = (position ^ velocity).norm();
+  up = cos(stabilized_attitude_angle * M_PI / 180) * position.norm() + sin(stabilized_attitude_angle * M_PI / 180) * (perp ^ position.norm()) + (1 - cos(stabilized_attitude_angle * M_PI / 180)) * (perp * position.norm()) * perp; // this is the direction we want the lander's nose to point in
 
   // !!!!!!!!!!!!! HINT TO STUDENTS ATTEMPTING THE EXTENSION EXERCISES !!!!!!!!!!!!!!
   // For any-angle attitude control, we just need to set "up" to something different,
@@ -2094,24 +2097,43 @@ void glut_key (unsigned char k, int x, int y)
     }
     if (paused) refresh_all_subwindows();
     break;
-
+  // Uncomment to make '<' and '>' change delta instead of stabilized_attitude_angle
+//  case ',': case '<':
+//    // decrease delta
+//    if (autopilot_enabled && !landed) {
+//      delta -= 0.1;
+//      cout << "delta = " << delta << endl;
+//    }
+//    if (paused) refresh_all_subwindows();
+//    break;
+//
+//  case '.': case '>':
+//    // increase delta
+//    if (autopilot_enabled && !landed) {
+//      delta += 0.1;
+//      cout << "delta = " << delta << endl;
+//    }
+//    if (paused) refresh_all_subwindows();
+//    break;
+      
   case ',': case '<':
-    // decrease delta
-    if (autopilot_enabled && !landed) {
-      delta -= 0.1;
-      cout << "delta = " << delta << endl;
+    // decrease stabilized_attitude_angle
+    if (stabilized_attitude && !landed) {
+      stabilized_attitude_angle -= 5;
+      cout << "stabilized_attitude_angle = " << stabilized_attitude_angle << endl;
     }
     if (paused) refresh_all_subwindows();
     break;
       
   case '.': case '>':
-    // increase delta
-    if (autopilot_enabled && !landed) {
-      delta += 0.1;
-      cout << "delta = " << delta << endl;
+    // increase stabilized_attitude_angle
+    if (stabilized_attitude && !landed) {
+      stabilized_attitude_angle += 5;
+      cout << "stabilized_attitude_angle = " << stabilized_attitude_angle << endl;
     }
     if (paused) refresh_all_subwindows();
     break;
+      
   }
 }
 
