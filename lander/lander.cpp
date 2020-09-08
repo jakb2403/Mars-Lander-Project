@@ -94,7 +94,9 @@ void numerical_dynamics (void)
 //  position = position + delta_t * velocity;
 //  velocity = velocity + delta_t * acceleration;
   
-  // Calculate the attitude of the lander w.r.t. the position vector
+#warning TODO: Update stabilized attitude angle so that when it is turned on, it keeps it's current angle.
+#warning TODO: Make sure stabilized_attitude_angle is zero when turned on
+  
 //  stabilized_attitude_angle = / ;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
