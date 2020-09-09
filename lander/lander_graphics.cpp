@@ -84,8 +84,8 @@ void invert (double m[], double mout[])
   zero_three = -m[12]*m[0] - m[13]*m[1] - m[14]*m[2];
   one_three = -m[12]*m[4] - m[13]*m[5] - m[14]*m[6];
   two_three = -m[12]*m[8] - m[13]*m[9] - m[14]*m[10];
-  mout[1] = m[4]; mout[4] = m[1]; mout[2] = m[8]; mout[8] = m[2]; 
-  mout[6] = m[9]; mout[9] = m[6]; mout[12] = zero_three; mout[13] = one_three; 
+  mout[1] = m[4]; mout[4] = m[1]; mout[2] = m[8]; mout[8] = m[2];
+  mout[6] = m[9]; mout[9] = m[6]; mout[12] = zero_three; mout[13] = one_three;
   mout[14] = two_three; mout[0] = m[0]; mout[5] = m[5]; mout[10] = m[10];
   mout[15] = 1.0; mout[3] = 0.0; mout[7] = 0.0; mout[11] = 0.0;
 }
@@ -378,8 +378,8 @@ void glutMottledSphere (GLdouble radius, GLint slices, GLint stacks)
     for (j=slices; j>=0; j--) {
       glNormal3d(cost1[j]*r1, sint1[j]*r1, z1);
       if (j) {
-	new_r[j] = (1.0-mottle) + mottle*randtab[rtmp];
-	rtmp = (rtmp+1)%N_RAND;
+  new_r[j] = (1.0-mottle) + mottle*randtab[rtmp];
+  rtmp = (rtmp+1)%N_RAND;
       } else new_r[j] = new_r[slices];
       glColor3f(new_r[j]*0.63, new_r[j]*0.33, new_r[j]*0.22);
       glVertex3d(cost1[j]*r1*radius, sint1[j]*r1*radius, z1*radius);
@@ -393,16 +393,16 @@ void glutMottledSphere (GLdouble radius, GLint slices, GLint stacks)
       r0 = r1; r1 = sint2[i+1];
       glBegin(GL_QUAD_STRIP);
       for (j=0; j<=slices; j++) {
-	glNormal3d(cost1[j]*r1, sint1[j]*r1, z1);
-	if (j != slices) {
-	  new_r[j] = (1.0-mottle) + mottle*randtab[rtmp];
-	  rtmp = (rtmp+1)%N_RAND;
-	} else new_r[j] = new_r[0];
-	glColor3f(new_r[j]*0.63, new_r[j]*0.33, new_r[j]*0.22);
-	glVertex3d(cost1[j]*r1*radius, sint1[j]*r1*radius, z1*radius);
-	glNormal3d(cost1[j]*r0, sint1[j]*r0, z0);
-	glColor3f(old_r[j]*0.63, old_r[j]*0.33, old_r[j]*0.22);
-	glVertex3d(cost1[j]*r0*radius, sint1[j]*r0*radius, z0*radius);
+  glNormal3d(cost1[j]*r1, sint1[j]*r1, z1);
+  if (j != slices) {
+    new_r[j] = (1.0-mottle) + mottle*randtab[rtmp];
+    rtmp = (rtmp+1)%N_RAND;
+  } else new_r[j] = new_r[0];
+  glColor3f(new_r[j]*0.63, new_r[j]*0.33, new_r[j]*0.22);
+  glVertex3d(cost1[j]*r1*radius, sint1[j]*r1*radius, z1*radius);
+  glNormal3d(cost1[j]*r0, sint1[j]*r0, z0);
+  glColor3f(old_r[j]*0.63, old_r[j]*0.33, old_r[j]*0.22);
+  glVertex3d(cost1[j]*r0*radius, sint1[j]*r0*radius, z0*radius);
       }
       tmp = old_r; old_r = new_r; new_r = tmp;
       glEnd();
@@ -475,7 +475,7 @@ void glutCone (GLdouble base, GLdouble height, GLint slices, GLint stacks, bool 
   free(sint); free(cost);
 }
 
-void enable_lights (void) 
+void enable_lights (void)
   // Enable the appropriate subset of lights
 {
   if (static_lighting) {
@@ -670,7 +670,7 @@ void draw_indicator_lamp (double tcx, double tcy, string off_text, string on_tex
   glVertex2d(tcx-75.0, tcy);
   glEnd();
   if (on) glut_print(tcx-70.0, tcy-14.0, on_text + extra_text);
-  else glut_print(tcx-70.0, tcy-14.0, off_text + extra_text);
+  else glut_print(tcx-70.0, tcy-14.0, off_text);
 }
 
 void draw_instrument_window (void)
@@ -799,7 +799,7 @@ void display_help_arrows (void)
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
-  glOrtho(0, view_width, 0, view_height, 0.0, 1.0); 
+  glOrtho(0, view_width, 0, view_height, 0.0, 1.0);
   glRasterPos3f(x-16, y-15, -z);
   for (i = 0; i < ss.length(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, ss[i]);
   glPopMatrix();
@@ -835,7 +835,7 @@ void display_help_text (void)
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
-  glOrtho(0, view_width, 0, view_height, -1.0, 1.0); 
+  glOrtho(0, view_width, 0, view_height, -1.0, 1.0);
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
@@ -899,7 +899,7 @@ void display_help_prompt (void)
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
-  glOrtho(0, view_width, 0, view_height, -1.0, 1.0); 
+  glOrtho(0, view_width, 0, view_height, -1.0, 1.0);
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
@@ -973,7 +973,7 @@ void draw_orbital_window (void)
   j = (track.p+N_TRACK-1)%N_TRACK;
   for (i=0; i<track.n; i++) {
     glColor4f(0.0, 0.75*(N_TRACK-i)/N_TRACK, 0.75*(N_TRACK-i)/N_TRACK, 1.0*(N_TRACK-i)/N_TRACK);
-    glVertex3d(track.pos[j].x, track.pos[j].y, track.pos[j].z); 
+    glVertex3d(track.pos[j].x, track.pos[j].y, track.pos[j].z);
     j = (j+N_TRACK-1)%N_TRACK;
   }
   glEnd();
@@ -1079,7 +1079,7 @@ void update_closeup_coords (void)
   // Direction of tangential velocity - this must map to the world x-axis
   tv = velocity_from_positions - (velocity_from_positions*s)*s;
   if (tv.abs() < SMALL_NUM) // vertical motion only, use last recorded tangential velocity
-    tv = closeup_coords.backwards ? (closeup_coords.right*s)*s - closeup_coords.right : closeup_coords.right - (closeup_coords.right*s)*s; 
+    tv = closeup_coords.backwards ? (closeup_coords.right*s)*s - closeup_coords.right : closeup_coords.right - (closeup_coords.right*s)*s;
   if (tv.abs() > SMALL_NUM) t = tv.norm();
 
   // Check these two vectors are non-zero and perpendicular (they should be, unless s and closeup_coords.right happen to be parallel)
@@ -1163,7 +1163,7 @@ void draw_closeup_window (void)
   // Above the exosphere we see a long way and there is no fog.
   // Between the exosphere and transition_altitude, we see up to the horizon with increasing fog.
   // At transition_altitude we have a totally opaque haze, to disguise the transition from spherical surface to flat surface.
-  // Below transition_altitude, we can see as far as the horizon (or transition_altitude with no terrain texture), 
+  // Below transition_altitude, we can see as far as the horizon (or transition_altitude with no terrain texture),
   // with the fog decreasing towards touchdown.
   if (altitude > EXOSPHERE) gluPerspective(CLOSEUP_VIEW_ANGLE, aspect_ratio, 1.0, closeup_offset + 2.0*MARS_RADIUS);
   else {
@@ -1176,8 +1176,8 @@ void draw_closeup_window (void)
       f = 1.0 - (altitude / transition_altitude);
       if (f < SMALL_NUM) fog_density = 1000.0; else fog_density = (1.0-f) / (f*transition_altitude);
       if (do_texture) {
-	fog_density = 0.00005 + 0.5*fog_density;
-	view_depth = closeup_offset + horizon;
+  fog_density = 0.00005 + 0.5*fog_density;
+  view_depth = closeup_offset + horizon;
       } else view_depth = closeup_offset + transition_altitude;
     }
     gluPerspective(CLOSEUP_VIEW_ANGLE, aspect_ratio, 1.0, view_depth);
@@ -1200,7 +1200,7 @@ void draw_closeup_window (void)
   s = position.norm();
 
   // Direction of tangential velocity - this must map to the world x-axis
-  t = closeup_coords.backwards ? -closeup_coords.right : closeup_coords.right; 
+  t = closeup_coords.backwards ? -closeup_coords.right : closeup_coords.right;
 
   // Mutual perpendicular to these two vectors - this must map to the world z-axis
   n = t^s;
@@ -1210,7 +1210,7 @@ void draw_closeup_window (void)
   m[4] = s.x; m[5] = s.y; m[6] = s.z; m[7] = 0.0;
   m[8] = n.x; m[9] = n.y; m[10] = n.z; m[11] = 0.0;
   m[12] = 0.0; m[13] = 0.0; m[14] = 0.0; m[15] = 1.0;
-  invert(m, m2); 
+  invert(m, m2);
 
   // Update terrain texture/line offsets
   if (simulation_time != last_redraw_time) {
@@ -1255,20 +1255,20 @@ void draw_closeup_window (void)
     glPushMatrix();
     glRotated(terrain_angle, 0.0, 1.0, 0.0);
     glBegin(GL_QUADS);
-    glTexCoord2f(1.0 + terrain_offset_x, 1.0 + terrain_offset_y); glVertex3d(ground_plane_size, -altitude, ground_plane_size);      
+    glTexCoord2f(1.0 + terrain_offset_x, 1.0 + terrain_offset_y); glVertex3d(ground_plane_size, -altitude, ground_plane_size);
     glTexCoord2f(1.0 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(ground_plane_size, -altitude, 0.0);
-    glTexCoord2f(0.5 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(0.0, -altitude, 0.0);      
+    glTexCoord2f(0.5 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(0.0, -altitude, 0.0);
     glTexCoord2f(0.5 + terrain_offset_x, 1.0 + terrain_offset_y); glVertex3d(0.0, -altitude, ground_plane_size);
-    glTexCoord2f(0.5 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(0.0, -altitude, 0.0);      
+    glTexCoord2f(0.5 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(0.0, -altitude, 0.0);
     glTexCoord2f(1.0 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(ground_plane_size, -altitude, 0.0);
     glTexCoord2f(1.0 + terrain_offset_x, 0.0 + terrain_offset_y); glVertex3d(ground_plane_size, -altitude, -ground_plane_size);
     glTexCoord2f(0.5 + terrain_offset_x, 0.0 + terrain_offset_y); glVertex3d(0.0, -altitude, -ground_plane_size);
-    glTexCoord2f(0.5 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(0.0, -altitude, 0.0);      
+    glTexCoord2f(0.5 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(0.0, -altitude, 0.0);
     glTexCoord2f(0.5 + terrain_offset_x, 0.0 + terrain_offset_y); glVertex3d(0.0, -altitude, -ground_plane_size);
     glTexCoord2f(0.0 + terrain_offset_x, 0.0 + terrain_offset_y); glVertex3d(-ground_plane_size, -altitude, -ground_plane_size);
     glTexCoord2f(0.0 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(-ground_plane_size, -altitude, 0.0);
     glTexCoord2f(0.5 + terrain_offset_x, 1.0 + terrain_offset_y); glVertex3d(0.0, -altitude, ground_plane_size);
-    glTexCoord2f(0.5 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(0.0, -altitude, 0.0);      
+    glTexCoord2f(0.5 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(0.0, -altitude, 0.0);
     glTexCoord2f(0.0 + terrain_offset_x, 0.5 + terrain_offset_y); glVertex3d(-ground_plane_size, -altitude, 0.0);
     glTexCoord2f(0.0 + terrain_offset_x, 1.0 + terrain_offset_y); glVertex3d(-ground_plane_size, -altitude, ground_plane_size);
     glEnd();
@@ -1283,19 +1283,19 @@ void draw_closeup_window (void)
       if (closeup_coords.backwards) tmp = -ground_line_offset - transition_altitude;
       else tmp = ground_line_offset + transition_altitude;
       while ((closeup_coords.backwards ? -tmp : tmp) > -transition_altitude) {
-	// Fade the lines out towards the horizon, to avoid aliasing artefacts. The fade is a function of distance from the
-	// centre (tmp) and altitude: the lower the lander gets, the more pronounced the fade.
-	// We need to do draw each line in two parts, with a vertex nearby, to get the fog calculations correct in all OpenGL implementations.
-	// To make the lines fade more strongly when landed, decrease the second number.
-	// To make the lines less apparent at high altitude, decrease the first number. 
-	f = exp( -fabs( pow((transition_altitude-altitude) / transition_altitude, 10.0) * tmp / (10.0*GROUND_LINE_SPACING)) );
-	glColor4f(0.32, 0.17, 0.11, f);
-	glVertex3d(tmp, -altitude, -transition_altitude);
-	glVertex3d(tmp, -altitude, 0.0);
-	glVertex3d(tmp, -altitude, 0.0);
-	glVertex3d(tmp, -altitude, transition_altitude);
-	if (closeup_coords.backwards) tmp += GROUND_LINE_SPACING;
-	else tmp -= GROUND_LINE_SPACING;
+  // Fade the lines out towards the horizon, to avoid aliasing artefacts. The fade is a function of distance from the
+  // centre (tmp) and altitude: the lower the lander gets, the more pronounced the fade.
+  // We need to do draw each line in two parts, with a vertex nearby, to get the fog calculations correct in all OpenGL implementations.
+  // To make the lines fade more strongly when landed, decrease the second number.
+  // To make the lines less apparent at high altitude, decrease the first number.
+  f = exp( -fabs( pow((transition_altitude-altitude) / transition_altitude, 10.0) * tmp / (10.0*GROUND_LINE_SPACING)) );
+  glColor4f(0.32, 0.17, 0.11, f);
+  glVertex3d(tmp, -altitude, -transition_altitude);
+  glVertex3d(tmp, -altitude, 0.0);
+  glVertex3d(tmp, -altitude, 0.0);
+  glVertex3d(tmp, -altitude, transition_altitude);
+  if (closeup_coords.backwards) tmp += GROUND_LINE_SPACING;
+  else tmp -= GROUND_LINE_SPACING;
       }
       glEnd();
       glDisable(GL_BLEND);
@@ -1305,9 +1305,9 @@ void draw_closeup_window (void)
       glColor3f(0.32, 0.17, 0.11);
       glBegin(GL_TRIANGLES);
       for (i=0; i<360; i+=10) {
-	glVertex3d(0.0, -altitude, 0.0);
-	glVertex3d(LANDER_SIZE*cos(M_PI*(i+10)/180.0), -altitude, LANDER_SIZE*sin(M_PI*(i+10)/180.0));
-	glVertex3d(LANDER_SIZE*cos(M_PI*i/180.0), -altitude, LANDER_SIZE*sin(M_PI*i/180.0));
+  glVertex3d(0.0, -altitude, 0.0);
+  glVertex3d(LANDER_SIZE*cos(M_PI*(i+10)/180.0), -altitude, LANDER_SIZE*sin(M_PI*(i+10)/180.0));
+  glVertex3d(LANDER_SIZE*cos(M_PI*i/180.0), -altitude, LANDER_SIZE*sin(M_PI*i/180.0));
       }
       glEnd();
     } else {
@@ -1315,28 +1315,28 @@ void draw_closeup_window (void)
       glColor3f(1.0, 1.0, 1.0);
       glBegin(GL_TRIANGLES); // draw some shards of metal
       for (i=0; i<60; i++) {
-	for (j=0; j<8; j++) { rand_tri[j] = randtab[rtmp]; rtmp = (rtmp+1)%N_RAND; }
-	cx = 40.0 * (rand_tri[0] - 0.5);
-	cy = 40.0 * (rand_tri[1] - 0.5);
-	glNormal3d(0.0, 1.0, 0.0);
-	glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[2], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[3]);
-	glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[4], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[5]);
-	glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[6], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[7]);
+  for (j=0; j<8; j++) { rand_tri[j] = randtab[rtmp]; rtmp = (rtmp+1)%N_RAND; }
+  cx = 40.0 * (rand_tri[0] - 0.5);
+  cy = 40.0 * (rand_tri[1] - 0.5);
+  glNormal3d(0.0, 1.0, 0.0);
+  glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[2], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[3]);
+  glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[4], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[5]);
+  glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[6], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[7]);
       }
       glEnd();
       if (parachute_status != LOST) {
-	glColor3f(1.0, 1.0, 0.0);
-	glBegin(GL_TRIANGLES);  // draw some shreds of yellow canvas
-	for (i=0; i<30; i++) {
-	  for (j=0; j<8; j++) { rand_tri[j] = randtab[rtmp]; rtmp = (rtmp+1)%N_RAND; }
-	  cx = 40.0 * (rand_tri[0] - 0.5);
-	  cy = 40.0 * (rand_tri[1] - 0.5);
-	  glNormal3d(0.0, 1.0, 0.0);
-	  glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[2], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[3]);
-	  glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[4], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[5]);
-	  glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[6], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[7]);
-	}
-	glEnd();
+  glColor3f(1.0, 1.0, 0.0);
+  glBegin(GL_TRIANGLES);  // draw some shreds of yellow canvas
+  for (i=0; i<30; i++) {
+    for (j=0; j<8; j++) { rand_tri[j] = randtab[rtmp]; rtmp = (rtmp+1)%N_RAND; }
+    cx = 40.0 * (rand_tri[0] - 0.5);
+    cy = 40.0 * (rand_tri[1] - 0.5);
+    glNormal3d(0.0, 1.0, 0.0);
+    glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[2], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[3]);
+    glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[4], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[5]);
+    glVertex3d(cx + 2.0*LANDER_SIZE*rand_tri[6], -altitude, cy + 2.0*LANDER_SIZE*rand_tri[7]);
+  }
+  glEnd();
       }
     }
     glEnable(GL_DEPTH_TEST);
@@ -1373,7 +1373,7 @@ void draw_closeup_window (void)
   glDisable(GL_FOG); // fog only applies to the ground
   dark_side = (static_lighting && (position.y > 0.0) && (sqrt(position.x*position.x + position.z*position.z) < MARS_RADIUS));
   if (dark_side) { // in the shadow of the planet, we need some diffuse lighting to highlight the lander
-    glDisable(GL_LIGHT2); glDisable(GL_LIGHT3); 
+    glDisable(GL_LIGHT2); glDisable(GL_LIGHT3);
     glEnable(GL_LIGHT4); glEnable(GL_LIGHT5);
   }
 
@@ -1439,7 +1439,7 @@ void draw_closeup_window (void)
   // Draw incandescent glow surrounding lander
   if (lander_drag*velocity_from_positions.abs() > HEAT_FLUX_GLOW_THRESHOLD) {
     // Calculate an heuristic "glow factor", in the range 0 to 1, for graphics effects
-    glow_factor = (lander_drag*velocity_from_positions.abs()-HEAT_FLUX_GLOW_THRESHOLD) / (4.0*HEAT_FLUX_GLOW_THRESHOLD); 
+    glow_factor = (lander_drag*velocity_from_positions.abs()-HEAT_FLUX_GLOW_THRESHOLD) / (4.0*HEAT_FLUX_GLOW_THRESHOLD);
     if (glow_factor > 1.0) glow_factor = 1.0;
     glow_factor *= 0.7 + 0.3*randtab[rn]; rn = (rn+1)%N_RAND; // a little random variation for added realism
     glRotated((180.0/M_PI)*atan2(climb_speed, ground_speed), 0.0, 0.0, 1.0);
@@ -1453,7 +1453,7 @@ void draw_closeup_window (void)
     glEnable(GL_LIGHTING);
   }
 
-  glutSwapBuffers(); 
+  glutSwapBuffers();
 }
 
 void draw_main_window (void)
@@ -1546,7 +1546,7 @@ void update_visualization (void)
     c = last_position.abs2() - (MARS_RADIUS + LANDER_SIZE/2.0) * (MARS_RADIUS + LANDER_SIZE/2.0);
     mu = (-b - sqrt(b*b-4.0*a*c))/(2.0*a);
     position = last_position + mu*d;
-    simulation_time -= (1.0-mu)*delta_t; 
+    simulation_time -= (1.0-mu)*delta_t;
     altitude = LANDER_SIZE/2.0;
     landed = true;
     if ((fabs(climb_speed) > MAX_IMPACT_DESCENT_RATE) || (fabs(ground_speed) > MAX_IMPACT_GROUND_SPEED)) crashed = true;
@@ -1569,7 +1569,7 @@ void update_visualization (void)
     }
   }
 
-  // Update record of lander's previous positions, but only if the position or the velocity has 
+  // Update record of lander's previous positions, but only if the position or the velocity has
   // changed significantly since the last update
   if ( !track.n || (position-last_track_position).norm() * velocity_from_positions.norm() < TRACK_ANGLE_DELTA
       || (position-last_track_position).abs() > TRACK_DISTANCE_DELTA ) {
@@ -1584,7 +1584,7 @@ void update_visualization (void)
 }
 
 void attitude_stabilization (void)
-  // Three-axis stabilization to ensure the lander's base is always pointing downwards 
+  // Three-axis stabilization to ensure the lander's base is always pointing downwards
 {
   vector3d up, left, out, perp;
   double m[16];
@@ -1604,7 +1604,7 @@ void attitude_stabilization (void)
   // Set left to something perpendicular to up
   left.x = -up.y; left.y = up.x; left.z = 0.0;
   if (left.abs() < SMALL_NUM) {left.x = -up.z; left.y = 0.0; left.z = up.x;}
-  left = left.norm();  
+  left = left.norm();
   out = left^up;
   // Construct modelling matrix (rotation only) from these three vectors
   m[0] = out.x; m[1] = out.y; m[2] = out.z; m[3] = 0.0;
@@ -1720,7 +1720,7 @@ void reset_simulation (void)
 
   // Miscellaneous state variables
   throttle_control = (short)(throttle*THROTTLE_GRANULARITY + 0.5);
-  simulation_time = 0.0;  
+  simulation_time = 0.0;
   track.n = 0;
   parachute_lost = false;
   closeup_coords.initialized = false;
@@ -1752,8 +1752,8 @@ void set_orbital_projection_matrix (void)
   glutSetWindow(orbital_window);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(-2.0*MARS_RADIUS*aspect_ratio/orbital_zoom, 2.0*MARS_RADIUS*aspect_ratio/orbital_zoom, 
-	  -2.0*MARS_RADIUS/orbital_zoom, 2.0*MARS_RADIUS/orbital_zoom, -100.0*MARS_RADIUS, 100.0*MARS_RADIUS);
+  glOrtho(-2.0*MARS_RADIUS*aspect_ratio/orbital_zoom, 2.0*MARS_RADIUS*aspect_ratio/orbital_zoom,
+    -2.0*MARS_RADIUS/orbital_zoom, 2.0*MARS_RADIUS/orbital_zoom, -100.0*MARS_RADIUS, 100.0*MARS_RADIUS);
 }
 
 void reshape_main_window (int width, int height)
@@ -1798,8 +1798,8 @@ void reshape_main_window (int width, int height)
   glViewport(0, 0, 2*(view_width+GAP), INSTRUMENT_HEIGHT);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0, 2*(view_width+GAP), 0, INSTRUMENT_HEIGHT, -1.0, 1.0); 
-  glDrawBuffer(GL_BACK); 
+  glOrtho(0, 2*(view_width+GAP), 0, INSTRUMENT_HEIGHT, -1.0, 1.0);
+  glDrawBuffer(GL_BACK);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glutPostRedisplay();
@@ -1846,9 +1846,9 @@ void orbital_mouse_motion (int x, int y)
   if (last_click_x < 0) return; // not the left mouse button
 
   spin_quat = track_quats((2.0*last_click_x - view_width) / view_width,
-			  (view_height - 2.0*last_click_y) / view_height,
-			  (2.0*x - view_width) / view_width,
-			  (view_height - 2.0*y) / view_height);
+        (view_height - 2.0*last_click_y) / view_height,
+        (2.0*x - view_width) / view_width,
+        (view_height - 2.0*y) / view_height);
   orbital_quat = add_quats(spin_quat, orbital_quat);
   last_click_x = x;
   last_click_y = y;
@@ -2050,6 +2050,7 @@ void glut_key (unsigned char k, int x, int y)
   case 's': case 'S':
     // s or S - attitude stabilizer
     if (!autopilot_enabled && !landed) stabilized_attitude = !stabilized_attitude;
+    if (stabilized_attitude) stabilized_attitude_angle = 0;
     if (paused) refresh_all_subwindows();
     break;
 
@@ -2155,7 +2156,7 @@ int main (int argc, char* argv[])
   glDisable(GL_LIGHTING);
   glDisable(GL_DEPTH_TEST);
   glutDisplayFunc(draw_main_window);
-  glutReshapeFunc(reshape_main_window);  
+  glutReshapeFunc(reshape_main_window);
   glutIdleFunc(update_lander_state);
   glutKeyboardFunc(glut_key);
   glutSpecialFunc(glut_special);

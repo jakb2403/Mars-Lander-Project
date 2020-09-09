@@ -19,28 +19,50 @@ void autopilot (void)
 {
   // INSERT YOUR CODE HERE
   
-  // Deploy parachute if lander under 70km and safe to deploy
-  if (parachute_status == NOT_DEPLOYED && safe_to_deploy_parachute() && altitude < 70000){
-    parachute_status = DEPLOYED;
-  }
-
   // Enable altitude stabilisation
   stabilized_attitude = true;
-  
-  // Calculate error term
-  double error = -(0.5 + K_h * altitude + (velocity * position.norm()));
-
-  // Calculate P_out
-  double P_out = K_p * error;
-  
-  // Calculate new throttle level
-  if (P_out <= (-delta)) {
-    throttle = 0;
-  } else if (P_out < (1 - delta)) {
-    throttle = delta + P_out;
-  } else {
-    throttle = 1;
+    
+  // Orbital re-entry sequence
+  if (ground_speed > 1000 && climb_speed > -50 && altitude > 70000 && (drag_force_lander.abs() * velocity.abs()) < HEAT_FLUX_GLOW_THRESHOLD) {
+    double climb_error = climb_speed + 50;
+    stabilized_attitude_angle = -90;
+    throttle = (0.5 * tanh(0.1 * climb_error -2) +0.5);
   }
+  // Deploy parachute if lander under 70km and safe to deploy
+  else if (parachute_status == NOT_DEPLOYED && safe_to_deploy_parachute() && altitude < 70000) {
+    parachute_status = DEPLOYED;
+    stabilized_attitude_angle = 0;
+  }
+  else {
+    double throttle_vert, throttle_horiz;
+    
+    // Calculate error term
+    double error = -(0.5 + K_h * altitude + (velocity * position.norm()));
+
+    // Calculate P_out
+    double P_out = K_p * error;
+    
+    // Calculate new downwards throttle level
+    if (P_out <= (-delta)) {
+      throttle_vert = 0;
+    } else if (P_out < (1 - delta)) {
+      throttle_vert = delta + P_out;
+    } else {
+      throttle_vert = 1;
+    }
+    
+    if (altitude < 200 && ground_speed > 1) {
+      throttle_horiz = 0.2;
+      stabilized_attitude_angle = -atan(throttle_horiz / throttle_vert) * 180 / M_PI;
+      cout << "vert = " << throttle_vert << "\thoriz = " << throttle_horiz <<  "\tangle = " << stabilized_attitude_angle <<  endl;
+    } else {
+      throttle_horiz = 0;
+    }
+// this is a test of the source control for githubs
+    throttle = double (min(sqrt(pow(throttle_vert, 2) + pow(throttle_horiz, 2)), 1.0));
+  }
+  
+
   
   // Write the values of h and v.e_r to file
   ofstream fout;
@@ -93,11 +115,6 @@ void numerical_dynamics (void)
   // EULER INTEGRATION
 //  position = position + delta_t * velocity;
 //  velocity = velocity + delta_t * acceleration;
-  
-#warning TODO: Update stabilized attitude angle so that when it is turned on, it keeps it's current angle.
-#warning TODO: Make sure stabilized_attitude_angle is zero when turned on
-  
-//  stabilized_attitude_angle = / ;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled) autopilot();
