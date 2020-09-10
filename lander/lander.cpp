@@ -26,7 +26,7 @@ void autopilot (void)
   if (ground_speed > 1000 && climb_speed > -50 && altitude > 70000 && (drag_force_lander.abs() * velocity.abs()) < HEAT_FLUX_GLOW_THRESHOLD) {
     double climb_error = climb_speed + 50;
     stabilized_attitude_angle = -90;
-    throttle = (0.5 * tanh(0.1 * climb_error -2) +0.5);
+    throttle = (0.5 * tanh(0.01 * climb_error - 2.5) +0.5);
   }
   // Deploy parachute if lander under 70km and safe to deploy
   else if (parachute_status == NOT_DEPLOYED && safe_to_deploy_parachute() && altitude < 70000) {
@@ -58,7 +58,7 @@ void autopilot (void)
     } else {
       throttle_horiz = 0;
     }
-// this is a test of the source control for githubs
+
     throttle = double (min(sqrt(pow(throttle_vert, 2) + pow(throttle_horiz, 2)), 1.0));
   }
   
@@ -66,7 +66,7 @@ void autopilot (void)
   
   // Write the values of h and v.e_r to file
   ofstream fout;
-  fout.open("/Users/johnbrown/OneDrive - University of Cambridge/Engineering Tripos/Part IA/1CW_Mars_Lander/lander/lander/altitudes.txt", fstream::out | fstream::app);
+  fout.open("/Users/johnbrown/Documents/GitHub/lander/lander/altitudes.txt", fstream::out | fstream::app);
     if (fout) { // file opened successfully
       fout << altitude << " " << (velocity * position.norm()) << endl;
     } else { // file did not open successfully
