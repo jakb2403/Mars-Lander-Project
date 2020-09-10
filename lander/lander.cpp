@@ -24,24 +24,18 @@ void autopilot (void)
   vector3d ang_momentum;
   double theta_dot, orbit_energy, eccentricity, r_min;
 
-  //  theta_dot = (velocity * ((position.norm() ^ velocity.norm()) ^ position.norm())) / position.abs(); // this is an approximation and can be discarded
+  // Calculation of periapsis for re-entry sequence
   ang_momentum = position ^ (tot_mass * velocity);
   theta_dot = ang_momentum.abs() / (tot_mass * position.abs2());
   orbit_energy = 0.5 * tot_mass * velocity.abs2() - (GRAVITY * MARS_MASS * tot_mass / position.abs());
   eccentricity = sqrt(1 + ((2 * orbit_energy * ang_momentum.abs2()) / (pow(tot_mass, 3) * pow((-GRAVITY * MARS_MASS), 2))));
   r_min = (ang_momentum.abs2() / (pow(tot_mass, 2) * (GRAVITY * MARS_MASS))) * (1 / (1 + eccentricity));
-//  cout << "theta_dot = " << theta_dot << "\tang_mom = " << ang_momentum.abs() << "\tenergy = " << orbit_energy <<"\teccentricity = " << eccentricity <<  "\tr_min = " << r_min << "\tmass = " << tot_mass << endl;
-
+  
+  // Orbital re-entry sequence: if periapsis of current orbit greater than re-entry alt, then thrust to decease speed
   if (r_min > (MARS_RADIUS+77500)) {
     stabilized_attitude_angle = -90;
     throttle = 1;
   }
-  // Orbital re-entry sequence
-//  if (ground_speed > 1000 && climb_speed > -50 && altitude > 70000 && (drag_force_lander.abs() * velocity.abs()) < HEAT_FLUX_GLOW_THRESHOLD) {
-//    double climb_error = climb_speed + 50;
-//    stabilized_attitude_angle = -90;
-//    throttle = (0.5 * tanh(0.01 * climb_error - 2.5) +0.5);
-//  }
   // Deploy parachute if lander under 70km and safe to deploy
   else if (parachute_status == NOT_DEPLOYED && safe_to_deploy_parachute() && altitude < 70000) {
     parachute_status = DEPLOYED;
@@ -75,18 +69,6 @@ void autopilot (void)
 
     throttle = double (min(sqrt(pow(throttle_vert, 2) + pow(throttle_horiz, 2)), 1.0));
   }
-  
-
-  
-//  // Write the values of h and v.e_r to file
-//  ofstream fout;
-//  fout.open("/Users/johnbrown/Documents/GitHub/lander/lander/altitudes.txt", fstream::out | fstream::app);
-//    if (fout) { // file opened successfully
-//      fout << altitude << " " << (velocity * position.norm()) << endl;
-//    } else { // file did not open successfully
-//      cout << "Could not open file for writing" << endl;
-//    }
-//  fout.close();
 }
 
 void numerical_dynamics (void)
