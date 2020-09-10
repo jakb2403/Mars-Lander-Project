@@ -171,12 +171,12 @@ vector3d position, orientation, velocity, velocity_from_positions, last_position
 double climb_speed, ground_speed, altitude, throttle, fuel;
 bool stabilized_attitude, autopilot_enabled, parachute_lost;
 parachute_status_t parachute_status;
-double stabilized_attitude_angle;
+double stabilized_attitude_angle, tot_mass;
 
 // Set values of K_h, K_p and delta
-double K_h = 0.018;
+double K_h = 0.019;
 double K_p = 2.0;
-double delta = 1.0;
+double delta = 0.5;
 
 //Optimal values for 10km descent K_h = 0.025, K_p = 2.0, delta = 1.0
 
@@ -199,7 +199,7 @@ extern unsigned short scenario;
 extern string scenario_description[];
 extern vector3d position, orientation, velocity, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration;
 extern parachute_status_t parachute_status;
-extern double stabilized_attitude_angle;
+extern double stabilized_attitude_angle, tot_mass;
 
 #endif
 
