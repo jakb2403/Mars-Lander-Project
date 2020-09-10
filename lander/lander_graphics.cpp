@@ -693,7 +693,7 @@ void draw_instrument_window (void)
   else draw_dial (view_width+GAP-150, INSTRUMENT_HEIGHT/2, landed ? 0.0 : -climb_speed, "Descent rate", "m/s");
 
   // Draw attitude stabilizer lamp
-  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, (" | angle=" + to_string(stabilized_attitude_angle)));
+  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
   
   // Draw ground speed meter
   draw_dial (view_width+GAP+100, INSTRUMENT_HEIGHT/2, landed ? 0.0 : ground_speed, "Ground speed", "m/s");
@@ -2099,41 +2099,41 @@ void glut_key (unsigned char k, int x, int y)
     if (paused) refresh_all_subwindows();
     break;
   // Uncomment to make '<' and '>' change delta instead of stabilized_attitude_angle
-  case ',': case '<':
-    // decrease delta
-    if (autopilot_enabled && !landed) {
-      delta -= 0.01;
-      cout << "delta = " << delta << endl;
-    }
-    if (paused) refresh_all_subwindows();
-    break;
-
-  case '.': case '>':
-    // increase delta
-    if (autopilot_enabled && !landed) {
-      delta += 0.01;
-      cout << "delta = " << delta << endl;
-    }
-    if (paused) refresh_all_subwindows();
-    break;
-      
 //  case ',': case '<':
-//    // decrease stabilized_attitude_angle
-//    if (stabilized_attitude && !landed) {
-//      stabilized_attitude_angle -= 5;
-//      cout << "stabilized_attitude_angle = " << stabilized_attitude_angle << endl;
+//    // decrease delta
+//    if (autopilot_enabled && !landed) {
+//      delta -= 0.01;
+//      cout << "delta = " << delta << endl;
 //    }
 //    if (paused) refresh_all_subwindows();
 //    break;
 //
 //  case '.': case '>':
-//    // increase stabilized_attitude_angle
-//    if (stabilized_attitude && !landed) {
-//      stabilized_attitude_angle += 5;
-//      cout << "stabilized_attitude_angle = " << stabilized_attitude_angle << endl;
+//    // increase delta
+//    if (autopilot_enabled && !landed) {
+//      delta += 0.01;
+//      cout << "delta = " << delta << endl;
 //    }
 //    if (paused) refresh_all_subwindows();
 //    break;
+      
+  case ',': case '<':
+    // decrease stabilized_attitude_angle
+    if (stabilized_attitude && !landed) {
+      stabilized_attitude_angle -= 5;
+      cout << "stabilized_attitude_angle = " << stabilized_attitude_angle << endl;
+    }
+    if (paused) refresh_all_subwindows();
+    break;
+
+  case '.': case '>':
+    // increase stabilized_attitude_angle
+    if (stabilized_attitude && !landed) {
+      stabilized_attitude_angle += 5;
+      cout << "stabilized_attitude_angle = " << stabilized_attitude_angle << endl;
+    }
+    if (paused) refresh_all_subwindows();
+    break;
       
   }
 }

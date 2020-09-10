@@ -32,7 +32,7 @@ void autopilot (void)
   r_min = (ang_momentum.abs2() / (pow(tot_mass, 2) * (GRAVITY * MARS_MASS))) * (1 / (1 + eccentricity));
   
   // Orbital re-entry sequence: if periapsis of current orbit greater than re-entry alt, then thrust to decease speed
-  if (r_min > (MARS_RADIUS+77500)) {
+  if (r_min > (MARS_RADIUS+77500)) { // 99500
     stabilized_attitude_angle = -90;
     throttle = 1;
   }
