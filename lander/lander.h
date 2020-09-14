@@ -169,7 +169,7 @@ unsigned long long time_program_started;
 // any errors in the velocity update in numerical_dynamics
 vector3d position, orientation, velocity, velocity_from_positions, last_position, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit;
 double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor;
-bool stabilized_attitude, autopilot_enabled, parachute_lost;
+bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj;
 parachute_status_t parachute_status;
 double stabilized_attitude_angle, tot_mass, r_p;
 

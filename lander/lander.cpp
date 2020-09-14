@@ -121,7 +121,7 @@ void numerical_dynamics (void)
   major_unit = cos(theta) * position.norm() + sin(theta) * (perp ^ position.norm()) + (1 - cos(theta)) * (perp * position.norm()) * perp;
   minor_unit = perp ^ major_unit;
     
-  cout << "r_p = " << r_p << "\tmajor = " << semi_major << "\tminor = " << semi_minor << "\ttheta = " << theta << "= " << (theta * 180 / M_PI) << " deg" << "\te = " << eccentricity << "\tenergy = " << orbit_energy << endl;
+//  cout << "r_p = " << r_p << "\tmajor = " << semi_major << "\tminor = " << semi_minor << "\ttheta = " << theta << "= " << (theta * 180 / M_PI) << " deg" << "\te = " << eccentricity << "\tenergy = " << orbit_energy << endl;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled) autopilot();
