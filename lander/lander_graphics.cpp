@@ -922,7 +922,8 @@ void display_help_prompt (void)
 void draw_orbital_window (void)
   // Draws the orbital view
 {
-  unsigned short i, j;
+  unsigned short i, j, angle;
+  vector3d current_point;
   double m[16], sf;
   GLint slices, stacks;
 
@@ -978,6 +979,16 @@ void draw_orbital_window (void)
   }
   glEnd();
   glDisable(GL_BLEND);
+
+  // Draw predicted trajectory (not accounting for air resistance)
+  glLineWidth(1.0);
+  glBegin(GL_LINE_STRIP);
+  glColor3f(1.0, 0.0, 0.0);
+  for (angle=0; angle<2*M_PI; angle+=(2*M_PI/1000)) {
+    current_point = -(eccentricity * semi_major) * major_unit + semi_major * cos(angle) * major_unit + semi_minor * sin(angle) * minor_unit;
+    glVertex3d(current_point.x, current_point.y, current_point.z);
+  }
+  glEnd();
 
   // Draw lander as a cyan dot
   glColor3f(0.0, 1.0, 1.0);

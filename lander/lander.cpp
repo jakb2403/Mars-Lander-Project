@@ -21,18 +21,30 @@ void autopilot (void)
   // Enable altitude stabilisation
   stabilized_attitude = true;
   
-  vector3d ang_momentum;
-  double theta_dot, orbit_energy, eccentricity, r_min;
+  vector3d ang_momentum, perp;
+  double theta_dot, orbit_energy, r_p, theta, cos_theta;
 
   // Calculation of periapsis for re-entry sequence
   ang_momentum = position ^ (tot_mass * velocity);
   theta_dot = ang_momentum.abs() / (tot_mass * position.abs2());
   orbit_energy = 0.5 * tot_mass * velocity.abs2() - (GRAVITY * MARS_MASS * tot_mass / position.abs());
   eccentricity = sqrt(1 + ((2 * orbit_energy * ang_momentum.abs2()) / (pow(tot_mass, 3) * pow((-GRAVITY * MARS_MASS), 2))));
-  r_min = (ang_momentum.abs2() / (pow(tot_mass, 2) * (GRAVITY * MARS_MASS))) * (1 / (1 + eccentricity));
+  r_p = (ang_momentum.abs2() / (pow(tot_mass, 2) * (GRAVITY * MARS_MASS))) * (1 / (1 + eccentricity));
+  semi_major = r_p / (1 - eccentricity); // a on the elipse diagram
+  semi_minor = semi_major * sqrt(1 - pow((1 - eccentricity), 2)); // b on the elipse diagram
+  cos_theta = ((ang_momentum.abs2()/(pow(tot_mass, 2) * (GRAVITY * MARS_MASS) * position.abs())) - 1) / eccentricity;
+  theta = acos(cos_theta); // theta in radians!
+  if (climb_speed > 0) theta += M_PI;
   
+  perp = (position ^ velocity).norm();
+  major_unit = cos(theta * M_PI / 180) * position.norm() + sin(theta * M_PI / 180) * (perp ^ position.norm()) + (1 - cos(theta * M_PI / 180)) * (perp * position.norm()) * perp;
+  minor_unit = perp ^ major_unit;
+  
+//  cout << "r_p = " << r_p << "\tmajor = " << semi_major << "\tminor = " << semi_minor << "\ttheta = " << theta << "= " << (theta * 180 / M_PI) << " deg" << "\tthing = " << thing << "\te = " << eccentricity << endl;
+  
+    
   // Orbital re-entry sequence: if periapsis of current orbit greater than re-entry alt, then thrust to decease speed
-  if (r_min > (MARS_RADIUS+77500)) { // 99500
+  if (r_p > (MARS_RADIUS+77500)) { // 99500
     stabilized_attitude_angle = -90;
     throttle = 1;
   }
