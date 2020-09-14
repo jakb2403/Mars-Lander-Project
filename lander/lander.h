@@ -171,7 +171,7 @@ vector3d position, orientation, velocity, velocity_from_positions, last_position
 double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor;
 bool stabilized_attitude, autopilot_enabled, parachute_lost;
 parachute_status_t parachute_status;
-double stabilized_attitude_angle, tot_mass;
+double stabilized_attitude_angle, tot_mass, r_p;
 
 // Set values of K_h, K_p and delta
 double K_h = 0.019;
@@ -194,7 +194,7 @@ GLfloat straight_on[] = { 0.0, 0.0, 1.0, 0.0 };
 #else // extern declarations of those global variables used in lander.cpp
 
 extern bool stabilized_attitude, autopilot_enabled;
-extern double delta_t, simulation_time, throttle, fuel, altitude, K_h, K_p, delta, ground_speed, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor;
+extern double delta_t, simulation_time, throttle, fuel, altitude, K_h, K_p, delta, ground_speed, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor, r_p;
 extern unsigned short scenario;
 extern string scenario_description[];
 extern vector3d position, orientation, velocity, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit;

@@ -922,9 +922,9 @@ void display_help_prompt (void)
 void draw_orbital_window (void)
   // Draws the orbital view
 {
-  unsigned short i, j, angle;
+  unsigned short i, j;
   vector3d current_point;
-  double m[16], sf;
+  double m[16], sf, angle;
   GLint slices, stacks;
 
   glutSetWindow(orbital_window);
@@ -981,6 +981,8 @@ void draw_orbital_window (void)
   glDisable(GL_BLEND);
 
   // Draw predicted trajectory (not accounting for air resistance)
+  glDisable(GL_LIGHTING);
+  glEnable(GL_BLEND);
   glLineWidth(1.0);
   glBegin(GL_LINE_STRIP);
   glColor3f(1.0, 0.0, 0.0);
@@ -989,6 +991,7 @@ void draw_orbital_window (void)
     glVertex3d(current_point.x, current_point.y, current_point.z);
   }
   glEnd();
+  glDisable(GL_BLEND);
 
   // Draw lander as a cyan dot
   glColor3f(0.0, 1.0, 1.0);
@@ -2132,7 +2135,6 @@ void glut_key (unsigned char k, int x, int y)
     // decrease stabilized_attitude_angle
     if (stabilized_attitude && !landed) {
       stabilized_attitude_angle -= 5;
-      cout << "stabilized_attitude_angle = " << stabilized_attitude_angle << endl;
     }
     if (paused) refresh_all_subwindows();
     break;
@@ -2141,12 +2143,18 @@ void glut_key (unsigned char k, int x, int y)
     // increase stabilized_attitude_angle
     if (stabilized_attitude && !landed) {
       stabilized_attitude_angle += 5;
-      cout << "stabilized_attitude_angle = " << stabilized_attitude_angle << endl;
     }
     if (paused) refresh_all_subwindows();
     break;
+  
+  case 'o': case 'O':
+    // show predicted trajectory (not accounting for drag)
+    if (!landed) {
       
-  }
+    }
+    if (paused) refresh_all_subwindows();
+    break;
+}
 }
 
 int main (int argc, char* argv[])

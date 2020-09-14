@@ -20,28 +20,6 @@ void autopilot (void)
   // INSERT YOUR CODE HERE
   // Enable altitude stabilisation
   stabilized_attitude = true;
-  
-  vector3d ang_momentum, perp;
-  double theta_dot, orbit_energy, r_p, theta, cos_theta;
-
-  // Calculation of periapsis for re-entry sequence
-  ang_momentum = position ^ (tot_mass * velocity);
-  theta_dot = ang_momentum.abs() / (tot_mass * position.abs2());
-  orbit_energy = 0.5 * tot_mass * velocity.abs2() - (GRAVITY * MARS_MASS * tot_mass / position.abs());
-  eccentricity = sqrt(1 + ((2 * orbit_energy * ang_momentum.abs2()) / (pow(tot_mass, 3) * pow((-GRAVITY * MARS_MASS), 2))));
-  r_p = (ang_momentum.abs2() / (pow(tot_mass, 2) * (GRAVITY * MARS_MASS))) * (1 / (1 + eccentricity));
-  semi_major = r_p / (1 - eccentricity); // a on the elipse diagram
-  semi_minor = semi_major * sqrt(1 - pow((1 - eccentricity), 2)); // b on the elipse diagram
-  cos_theta = ((ang_momentum.abs2()/(pow(tot_mass, 2) * (GRAVITY * MARS_MASS) * position.abs())) - 1) / eccentricity;
-  theta = acos(cos_theta); // theta in radians!
-  if (climb_speed > 0) theta += M_PI;
-  
-  perp = (position ^ velocity).norm();
-  major_unit = cos(theta * M_PI / 180) * position.norm() + sin(theta * M_PI / 180) * (perp ^ position.norm()) + (1 - cos(theta * M_PI / 180)) * (perp * position.norm()) * perp;
-  minor_unit = perp ^ major_unit;
-  
-//  cout << "r_p = " << r_p << "\tmajor = " << semi_major << "\tminor = " << semi_minor << "\ttheta = " << theta << "= " << (theta * 180 / M_PI) << " deg" << "\tthing = " << thing << "\te = " << eccentricity << endl;
-  
     
   // Orbital re-entry sequence: if periapsis of current orbit greater than re-entry alt, then thrust to decease speed
   if (r_p > (MARS_RADIUS+77500)) { // 99500
@@ -88,6 +66,9 @@ void numerical_dynamics (void)
   // lander's pose. The time step is delta_t (global variable).
 {
   // INSERT YOUR CODE HERE
+  // Define varibles for use in trajectory prediction
+  vector3d ang_momentum, perp;
+  double theta_dot, orbit_energy, theta, cos_theta;
   
   // Calculate current mass of lander with fuel
   tot_mass = UNLOADED_LANDER_MASS + (fuel * FUEL_CAPACITY * FUEL_DENSITY);
@@ -123,6 +104,24 @@ void numerical_dynamics (void)
   // EULER INTEGRATION
 //  position = position + delta_t * velocity;
 //  velocity = velocity + delta_t * acceleration;
+
+  // Calculation of periapsis for re-entry sequence
+  ang_momentum = position ^ (tot_mass * velocity);
+  theta_dot = ang_momentum.abs() / (tot_mass * position.abs2());
+  orbit_energy = 0.5 * tot_mass * velocity.abs2() - (GRAVITY * MARS_MASS * tot_mass / position.abs());
+  eccentricity = sqrt(1 + ((2 * orbit_energy * ang_momentum.abs2()) / (pow(tot_mass, 3) * pow((-GRAVITY * MARS_MASS), 2))));
+  r_p = (ang_momentum.abs2() / (pow(tot_mass, 2) * (GRAVITY * MARS_MASS))) * (1 / (1 + eccentricity));
+  semi_major = r_p / (1 - eccentricity); // a on the elipse diagram
+  semi_minor = semi_major * sqrt(1 - pow(eccentricity, 2)); // b on the elipse diagram
+  cos_theta = ((ang_momentum.abs2()/(pow(tot_mass, 2) * (GRAVITY * MARS_MASS) * position.abs())) - 1) / eccentricity;
+  theta = acos(cos_theta); // theta in radians!
+  if (climb_speed > 0) theta += M_PI;
+  
+  perp = (position ^ velocity).norm();
+  major_unit = cos(theta) * position.norm() + sin(theta) * (perp ^ position.norm()) + (1 - cos(theta)) * (perp * position.norm()) * perp;
+  minor_unit = perp ^ major_unit;
+    
+  cout << "r_p = " << r_p << "\tmajor = " << semi_major << "\tminor = " << semi_minor << "\ttheta = " << theta << "= " << (theta * 180 / M_PI) << " deg" << "\te = " << eccentricity << "\tenergy = " << orbit_energy << endl;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled) autopilot();
