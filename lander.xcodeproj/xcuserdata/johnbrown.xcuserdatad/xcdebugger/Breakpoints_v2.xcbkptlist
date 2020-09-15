@@ -14,8 +14,8 @@
             filePath = "lander/lander_graphics.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "983"
-            endingLineNumber = "983"
+            startingLineNumber = "984"
+            endingLineNumber = "984"
             landmarkName = "draw_orbital_window()"
             landmarkType = "9">
          </BreakpointContent>

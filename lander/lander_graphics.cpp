@@ -980,19 +980,49 @@ void draw_orbital_window (void)
   glEnd();
   glDisable(GL_BLEND);
 
-  // Draw predicted trajectory (not accounting for air resistance)
-  glDisable(GL_LIGHTING);
-  glEnable(GL_BLEND);
-  glLineWidth(1.0);
-  glBegin(GL_LINE_STRIP);
-  glColor3f(1.0, 0.0, 0.0);
-  for (angle=0; angle<2*M_PI; angle+=(2*M_PI/1000)) {
-    current_point = -(eccentricity * semi_major) * major_unit + semi_major * cos(angle) * major_unit + semi_minor * sin(angle) * minor_unit;
-    glVertex3d(current_point.x, current_point.y, current_point.z);
+  if (show_pred_traj) {
+    // Draw predicted trajectory (not accounting for air resistance)
+    vector3d perp, current_colour;
+    double theta, cos_theta, current_point_drag, current_point_velocity;
+    
+    semi_major = r_p / (1 - eccentricity); // a on the elipse diagram
+    semi_minor = semi_major * sqrt(1 - pow(eccentricity, 2)); // b on the elipse diagram
+    cos_theta = ((ang_momentum.abs2()/(pow(tot_mass, 2) * (GRAVITY * MARS_MASS) * position.abs())) - 1) / eccentricity;
+    theta = acos(cos_theta); // theta in radians!
+    if (climb_speed > 0) theta += M_PI;
+    
+    perp = (position ^ velocity).norm();
+    major_unit = cos(theta) * position.norm() + sin(theta) * (perp ^ position.norm()) + (1 - cos(theta)) * (perp * position.norm()) * perp;
+    minor_unit = perp ^ major_unit;
+      
+  //  cout << "r_p = " << r_p << "\tmajor = " << semi_major << "\tminor = " << semi_minor << "\ttheta = " << theta << "= " << (theta * 180 / M_PI) << " deg" << "\te = " << eccentricity << "\tenergy = " << orbit_energy << endl;
+    
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glLineWidth(1.0);
+    glBegin(GL_LINE_STRIP);
+//    glColor3f(1.0, 0.0, 0.0);
+    for (angle=0; angle<2*M_PI; angle+=(2*M_PI/1000)) {
+      // Calculate drag at current_point if it is below 130km from the surface of mars
+      if (r_p < (MARS_RADIUS + 130000)) {
+        vector3d green = vector3d(0.14901960784, 0.82745098039, 0.4);
+        vector3d red = vector3d(1.0, 0.2, 0.2);
+        vector3d green_to_red = red - green;
+        current_point_velocity = (2/tot_mass) * (orbit_energy + (GRAVITY * MARS_MASS * tot_mass / current_point.abs()));
+        current_point_drag = 0.5 * atmospheric_density(current_point) * DRAG_COEF_LANDER * (M_PI * pow(LANDER_SIZE, 2)) * pow(current_point_velocity, 2);
+        current_colour = green + (double (min(current_point_drag*10, 1.0))) * green_to_red;
+        glColor3f(current_colour.x, current_colour.y, current_colour.z);
+      } else {
+        glColor3f(0.14901960784, 0.82745098039, 0.4);
+        // glColor3f(1.0, 0.2, 0.2);
+      }
+      current_point = -(eccentricity * semi_major) * major_unit + semi_major * cos(angle) * major_unit + semi_minor * sin(angle) * minor_unit;
+      glVertex3d(current_point.x, current_point.y, current_point.z);
+    }
+    glEnd();
+    glDisable(GL_BLEND);
   }
-  glEnd();
-  glDisable(GL_BLEND);
-
+    
   // Draw lander as a cyan dot
   glColor3f(0.0, 1.0, 1.0);
   glPointSize(3.0);
@@ -2150,7 +2180,8 @@ void glut_key (unsigned char k, int x, int y)
   case 'o': case 'O':
     // show predicted trajectory (not accounting for drag)
     if (!landed) {
-      
+      show_pred_traj = !show_pred_traj;
+      cout << "show_pred_traj = " << show_pred_traj << endl;
     }
     if (paused) refresh_all_subwindows();
     break;

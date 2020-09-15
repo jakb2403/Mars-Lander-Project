@@ -52,7 +52,7 @@ void autopilot (void)
     if (altitude < 200 && ground_speed > 1) {
       throttle_horiz = 0.2;
       stabilized_attitude_angle = -atan(throttle_horiz / throttle_vert) * 180 / M_PI;
-      cout << "vert = " << throttle_vert << "\thoriz = " << throttle_horiz <<  "\tangle = " << stabilized_attitude_angle <<  endl;
+//      cout << "vert = " << throttle_vert << "\thoriz = " << throttle_horiz <<  "\tangle = " << stabilized_attitude_angle <<  endl;
     } else {
       throttle_horiz = 0;
     }
@@ -67,9 +67,8 @@ void numerical_dynamics (void)
 {
   // INSERT YOUR CODE HERE
   // Define varibles for use in trajectory prediction
-  vector3d ang_momentum, perp;
-  double theta_dot, orbit_energy, theta, cos_theta;
-  
+  double theta_dot;
+    
   // Calculate current mass of lander with fuel
   tot_mass = UNLOADED_LANDER_MASS + (fuel * FUEL_CAPACITY * FUEL_DENSITY);
   
@@ -111,17 +110,6 @@ void numerical_dynamics (void)
   orbit_energy = 0.5 * tot_mass * velocity.abs2() - (GRAVITY * MARS_MASS * tot_mass / position.abs());
   eccentricity = sqrt(1 + ((2 * orbit_energy * ang_momentum.abs2()) / (pow(tot_mass, 3) * pow((-GRAVITY * MARS_MASS), 2))));
   r_p = (ang_momentum.abs2() / (pow(tot_mass, 2) * (GRAVITY * MARS_MASS))) * (1 / (1 + eccentricity));
-  semi_major = r_p / (1 - eccentricity); // a on the elipse diagram
-  semi_minor = semi_major * sqrt(1 - pow(eccentricity, 2)); // b on the elipse diagram
-  cos_theta = ((ang_momentum.abs2()/(pow(tot_mass, 2) * (GRAVITY * MARS_MASS) * position.abs())) - 1) / eccentricity;
-  theta = acos(cos_theta); // theta in radians!
-  if (climb_speed > 0) theta += M_PI;
-  
-  perp = (position ^ velocity).norm();
-  major_unit = cos(theta) * position.norm() + sin(theta) * (perp ^ position.norm()) + (1 - cos(theta)) * (perp * position.norm()) * perp;
-  minor_unit = perp ^ major_unit;
-    
-//  cout << "r_p = " << r_p << "\tmajor = " << semi_major << "\tminor = " << semi_minor << "\ttheta = " << theta << "= " << (theta * 180 / M_PI) << " deg" << "\te = " << eccentricity << "\tenergy = " << orbit_energy << endl;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled) autopilot();
