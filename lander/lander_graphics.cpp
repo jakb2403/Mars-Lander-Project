@@ -686,31 +686,54 @@ void draw_instrument_window (void)
   draw_dial (view_width+GAP-400, INSTRUMENT_HEIGHT/2, altitude, "Altitude", "m");
 
   // Draw auto-pilot lamp
-  draw_indicator_lamp (view_width+GAP-400, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled);
-
+//  draw_indicator_lamp (view_width+GAP-400, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled);
+  indicator_lamp auto_pilot_lamp = indicator_lamp(view_width+GAP-400, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled, 150, 20);
+  auto_pilot_lamp.on = autopilot_enabled;
+  auto_pilot_lamp.draw();
+  
   // Draw climb rate meter
   if (climb_speed >= 0.0) draw_dial (view_width+GAP-150, INSTRUMENT_HEIGHT/2, landed ? 0.0 : climb_speed, "Climb rate", "m/s");
   else draw_dial (view_width+GAP-150, INSTRUMENT_HEIGHT/2, landed ? 0.0 : -climb_speed, "Descent rate", "m/s");
 
   // Draw attitude stabilizer lamp
-  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
+//  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
+  indicator_lamp att_stabilizer_lamp = indicator_lamp(view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, 150, 20, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
+  att_stabilizer_lamp.on = stabilized_attitude;
+  att_stabilizer_lamp.draw();
   
   // Draw ground speed meter
   draw_dial (view_width+GAP+100, INSTRUMENT_HEIGHT/2, landed ? 0.0 : ground_speed, "Ground speed", "m/s");
 
   // Draw parachute lamp
+  indicator_lamp parachute_lamp = indicator_lamp(view_width+GAP+100, INSTRUMENT_HEIGHT-18, "", "", true, 150, 20);
   switch (parachute_status) {
   case NOT_DEPLOYED:
-    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "Parachute not deployed", "Do not deploy parachute", !safe_to_deploy_parachute());
+//    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "Parachute not deployed", "Do not deploy parachute", !safe_to_deploy_parachute());
+    parachute_lamp.off_text = "Parachute not deployed";
+    parachute_lamp.on_text = "Do not deploy parachute";
+    parachute_lamp.on = !safe_to_deploy_parachute();
+    parachute_lamp.draw();
     break;
   case DEPLOYED:
-    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "Parachute deployed", "", false);
+//    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "Parachute deployed", "", false);
+    parachute_lamp.off_text = "Parachute deployed";
+    parachute_lamp.on_text = "";
+    parachute_lamp.on = false;
+    parachute_lamp.draw();
     break;
   case LOST:
-    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "", "Parachute lost", true);
+//    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "", "Parachute lost", true);
+    parachute_lamp.off_text = "";
+    parachute_lamp.on_text = "Parachute lost";
+    parachute_lamp.on = true;
+    parachute_lamp.draw();
     break;
   }
 
+  indicator_lamps[0] = &auto_pilot_lamp;
+  indicator_lamps[1] = &att_stabilizer_lamp;
+  indicator_lamps[2] = &parachute_lamp;
+  
   // Draw speed bar
   draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-18, simulation_speed/10.0, 0.0, 0.0, 1.0, "Simulation speed");
   
@@ -1942,6 +1965,31 @@ void closeup_mouse_motion (int x, int y)
   if (paused || landed) refresh_all_subwindows();
 }
 
+void instrument_mouse_button (int button, int state, int x, int y)
+  // Callback for mouse button presses in the orbital view window
+{
+  if (button == GLUT_LEFT_BUTTON) {
+    if (state == GLUT_UP) {
+      last_click_x = x;
+      last_click_y = y;
+      cout << "x = " << last_click_x << "\ty=" << last_click_y << endl;
+      for (auto lamp : indicator_lamps) {
+        if (lamp->is_clicked(last_click_x, last_click_y)){
+          cout << "YEAH " << endl;
+          cout << lamp->on << endl;
+          lamp->on = !lamp->on;
+          cout << lamp->on << endl;
+        }
+      }
+    }
+    if (state == GLUT_DOWN) {
+      last_click_x = -1;
+      last_click_y = -1;
+    }
+    
+  }
+}
+
 void glut_special (int key, int x, int y)
   // Callback for special key presses in all windows
 {
@@ -2270,6 +2318,7 @@ int main (int argc, char* argv[])
   glutDisplayFunc(draw_instrument_window);
   glutKeyboardFunc(glut_key);
   glutSpecialFunc(glut_special);
+  glutMouseFunc(instrument_mouse_button);
 
   // Generate the random number table
   srand(0);

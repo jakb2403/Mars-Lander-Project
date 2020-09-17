@@ -31,6 +31,7 @@
 #include <cmath>
 #include <math.h>
 #include <cstdlib>
+#include <vector>
 
 // GLUT mouse wheel operations work under Linux only
 #if !defined (GLUT_WHEEL_UP)
@@ -85,6 +86,48 @@
 #define MAX_IMPACT_DESCENT_RATE 1.0 // (m/s)
 
 using namespace std;
+
+void glut_print (float x, float y, string s);
+
+class indicator_lamp {
+public:
+  double tcx, tcy, width, height;
+  string on_text, off_text, extra_text = "";
+  bool on;
+    indicator_lamp() {tcx = 0; tcy= 0; width = 0; height = 0; on_text = ""; off_text = ""; extra_text = ""; on = false;}
+  indicator_lamp(double cx, double cy, string off, string on, bool boolean,  double w, double h, string extra="") {
+    tcx = cx; tcy= cy; width = w; height = h; on_text = on; off_text = off; extra_text = extra; on = boolean;
+  }
+  void draw() {
+    if (on) glColor3f(0.5, 0.0, 0.0);
+    else glColor3f(0.0, 0.5, 0.0);
+    glBegin(GL_QUADS);
+    glVertex2d(tcx-(width/2-0.5), tcy-height+0.5);
+    glVertex2d(tcx+(width/2-0.5), tcy-height+0.5);
+    glVertex2d(tcx+(width/2-0.5), tcy-0.5);
+    glVertex2d(tcx-(width/2-0.5), tcy-0.5);
+    glEnd();
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2d(tcx-(width/2), tcy-height);
+    glVertex2d(tcx+(width/2), tcy-height);
+    glVertex2d(tcx+(width/2), tcy);
+    glVertex2d(tcx-(width/2), tcy);
+    glEnd();
+    if (on) glut_print(tcx-70.0, tcy-14.0, on_text + extra_text);
+    else glut_print(tcx-70.0, tcy-14.0, off_text);
+  }
+  bool is_clicked(int x, int y) {
+    bool clicked;
+    if (x>=(tcx-(width/2)) && x<=(tcx+(width/2)) && y>=(INSTRUMENT_HEIGHT-tcy) && y<=(INSTRUMENT_HEIGHT-(tcy-height))){
+      clicked = true;
+    } else {
+      clicked = false;
+    }
+    return clicked;
+  }
+private:
+};
 
 class vector3d {
   // Utility class for three-dimensional vector operations
@@ -172,6 +215,9 @@ double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_m
 bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj;
 parachute_status_t parachute_status;
 double stabilized_attitude_angle, tot_mass, r_p;
+//indicator_lamp autopilot_lamp, att_stabilizer_lamp, parachute_lamp;
+vector<indicator_lamp*> indicator_lamps(3);
+
 
 // Set values of K_h, K_p and delta
 double K_h = 0.019;
@@ -199,6 +245,7 @@ extern unsigned short scenario;
 extern string scenario_description[];
 extern vector3d position, orientation, velocity, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
 extern parachute_status_t parachute_status;
+//extern indicator_lamp autopilot_lamp, att_stabilizer_lamp, parachute_lamp;
 
 #endif
 
@@ -219,7 +266,6 @@ void glutMottledSphere (GLdouble radius, GLint slices, GLint stacks);
 void glutCone (GLdouble base, GLdouble height, GLint slices, GLint stacks, bool closed);
 void enable_lights (void);
 void setup_lights (void);
-void glut_print (float x, float y, string s);
 double atmospheric_density (vector3d pos);
 void draw_dial (double cx, double cy, double val, string title, string units);
 void draw_control_bar (double tlx, double tly, double val, double red, double green, double blue, string title);
