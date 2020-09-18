@@ -114,8 +114,8 @@ public:
     glVertex2d(tcx+(width/2), tcy);
     glVertex2d(tcx-(width/2), tcy);
     glEnd();
-    if (on) glut_print(tcx-70.0, tcy-14.0, on_text + extra_text);
-    else glut_print(tcx-70.0, tcy-14.0, off_text);
+    if (on) glut_print(tcx-65.0, tcy-14.0, on_text + extra_text);
+    else glut_print(tcx-65.0, tcy-14.0, off_text);
   }
   bool is_clicked(int x, int y) {
     bool clicked;

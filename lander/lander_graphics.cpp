@@ -687,9 +687,14 @@ void draw_instrument_window (void)
 
   // Draw auto-pilot lamp
 //  draw_indicator_lamp (view_width+GAP-400, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled);
-  indicator_lamp auto_pilot_lamp = indicator_lamp(view_width+GAP-400, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled, 150, 20);
+  indicator_lamp auto_pilot_lamp = indicator_lamp(view_width+GAP-200, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled, 140, 20);
   auto_pilot_lamp.on = autopilot_enabled;
   auto_pilot_lamp.draw();
+  
+  // Draw predicted trajectory lamp
+  indicator_lamp pred_traj_lamp = indicator_lamp(view_width+GAP-350, INSTRUMENT_HEIGHT-18, "Prediction off", "Prediction on", show_pred_traj, 140, 20);
+  pred_traj_lamp.on = show_pred_traj;
+  pred_traj_lamp.draw();
   
   // Draw climb rate meter
   if (climb_speed >= 0.0) draw_dial (view_width+GAP-150, INSTRUMENT_HEIGHT/2, landed ? 0.0 : climb_speed, "Climb rate", "m/s");
@@ -697,7 +702,7 @@ void draw_instrument_window (void)
 
   // Draw attitude stabilizer lamp
 //  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
-  indicator_lamp att_stabilizer_lamp = indicator_lamp(view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, 150, 20, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
+  indicator_lamp att_stabilizer_lamp = indicator_lamp(view_width+GAP-50, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, 140, 20, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
   att_stabilizer_lamp.on = stabilized_attitude;
   att_stabilizer_lamp.draw();
   
@@ -705,7 +710,7 @@ void draw_instrument_window (void)
   draw_dial (view_width+GAP+100, INSTRUMENT_HEIGHT/2, landed ? 0.0 : ground_speed, "Ground speed", "m/s");
 
   // Draw parachute lamp
-  indicator_lamp parachute_lamp = indicator_lamp(view_width+GAP+100, INSTRUMENT_HEIGHT-18, "", "", true, 150, 20);
+  indicator_lamp parachute_lamp = indicator_lamp(view_width+GAP+100, INSTRUMENT_HEIGHT-18, "", "", true, 140, 20);
   switch (parachute_status) {
   case NOT_DEPLOYED:
 //    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "Parachute not deployed", "Do not deploy parachute", !safe_to_deploy_parachute());
@@ -1965,6 +1970,7 @@ void closeup_mouse_motion (int x, int y)
   if (paused || landed) refresh_all_subwindows();
 }
 
+#warning Clicking in instrument panel not working
 void instrument_mouse_button (int button, int state, int x, int y)
   // Callback for mouse button presses in the orbital view window
 {
@@ -1975,10 +1981,10 @@ void instrument_mouse_button (int button, int state, int x, int y)
       cout << "x = " << last_click_x << "\ty=" << last_click_y << endl;
       for (auto lamp : indicator_lamps) {
         if (lamp->is_clicked(last_click_x, last_click_y)){
-          cout << "YEAH " << endl;
+          cout << "YEAH " << endl;\
+          cout << lamp->on_text << endl;
           cout << lamp->on << endl;
           lamp->on = !lamp->on;
-          cout << lamp->on << endl;
         }
       }
     }
@@ -2229,7 +2235,6 @@ void glut_key (unsigned char k, int x, int y)
     // show predicted trajectory (not accounting for drag)
     if (!landed) {
       show_pred_traj = !show_pred_traj;
-      cout << "show_pred_traj = " << show_pred_traj << endl;
     }
     if (paused) refresh_all_subwindows();
     break;
