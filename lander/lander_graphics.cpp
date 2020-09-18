@@ -772,8 +772,9 @@ void draw_instrument_window (void)
 
   // Draw fuel bar
   s.str(""); s << "Fuel " << fixed << fuel*FUEL_CAPACITY << " litres";
-  if (fuel > 0.5) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 0.0, 1.0, 0.0, s.str());
-  else if (fuel > 0.2) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 1.0, 0.5, 0.0, s.str());
+  if (fuel > 0.5 && fuel_rate_at_max_thrust!=0) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 0.0, 1.0, 0.0, s.str());
+  else if (fuel > 0.2 && fuel_rate_at_max_thrust!=0) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 1.0, 0.5, 0.0, s.str());
+  else if (fuel_rate_at_max_thrust == 0) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, 1.0, 0.27058823529, 0.25882352941, 0.35294117647, "Infinite Fuel Mode 100 litres");
   else draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 1.0, 0.0, 0.0, s.str());
 
   // Display simulation status
@@ -1628,7 +1629,7 @@ void update_visualization (void)
   // Update throttle and fuel (throttle might have been adjusted by the autopilot)
   if (throttle < 0.0) throttle = 0.0;
   if (throttle > 1.0) throttle = 1.0;
-  fuel -= delta_t * (FUEL_RATE_AT_MAX_THRUST*throttle) / FUEL_CAPACITY;
+  fuel -= delta_t * (fuel_rate_at_max_thrust*throttle) / FUEL_CAPACITY;
   if (fuel <= 0.0) fuel = 0.0;
   if (landed || (fuel == 0.0)) throttle = 0.0;
   throttle_control = (short)(throttle*THROTTLE_GRANULARITY + 0.5);
@@ -2235,6 +2236,15 @@ void glut_key (unsigned char k, int x, int y)
     // show predicted trajectory (not accounting for drag)
     if (!landed) {
       show_pred_traj = !show_pred_traj;
+    }
+    if (paused) refresh_all_subwindows();
+    break;
+  
+  case 'i': case 'I':
+    // turn on infinite fuel mode
+    if (!landed) {
+      if (fuel_rate_at_max_thrust==0.5) fuel_rate_at_max_thrust = 0.0;
+      else fuel_rate_at_max_thrust = 0.5;
     }
     if (paused) refresh_all_subwindows();
     break;

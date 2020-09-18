@@ -71,7 +71,7 @@
 #define LANDER_SIZE 1.0 // (m)
 #define UNLOADED_LANDER_MASS 100.0 // (kg)
 #define FUEL_CAPACITY 100.0 // (l)
-#define FUEL_RATE_AT_MAX_THRUST 0.5 // (l/s) originally 0.5
+//#define FUEL_RATE_AT_MAX_THRUST 0.5 // (l/s) originally 0.5
 #define FUEL_DENSITY 1.0 // (kg/l)
 // MAX_THRUST, as defined below, is 1.5 * weight of fully loaded lander at surface
 #define MAX_THRUST (1.5 * (FUEL_DENSITY*FUEL_CAPACITY+UNLOADED_LANDER_MASS) * (GRAVITY*MARS_MASS/(MARS_RADIUS*MARS_RADIUS))) // (N)
@@ -211,13 +211,14 @@ unsigned long long time_program_started;
 // Lander state - the visualization routines use velocity_from_positions, so not sensitive to
 // any errors in the velocity update in numerical_dynamics
 vector3d position, orientation, velocity, velocity_from_positions, last_position, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
-double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy;
+double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p;
 bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj;
 parachute_status_t parachute_status;
-double stabilized_attitude_angle, tot_mass, r_p;
-//indicator_lamp autopilot_lamp, att_stabilizer_lamp, parachute_lamp;
+#warning vector below used for buttons (not working)
 vector<indicator_lamp*> indicator_lamps(3);
 
+// Define fuel rate at max thrust that is not a const so that it can be changed for infinite fuel mode
+double fuel_rate_at_max_thrust = 0.5;
 
 // Set values of K_h, K_p and delta
 double K_h = 0.019;
