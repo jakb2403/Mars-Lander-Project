@@ -774,7 +774,10 @@ void draw_instrument_window (void)
   s.str(""); s << "Fuel " << fixed << fuel*FUEL_CAPACITY << " litres";
   if (fuel > 0.5 && fuel_rate_at_max_thrust!=0) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 0.0, 1.0, 0.0, s.str());
   else if (fuel > 0.2 && fuel_rate_at_max_thrust!=0) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 1.0, 0.5, 0.0, s.str());
-  else if (fuel_rate_at_max_thrust == 0) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, 1.0, 0.27058823529, 0.25882352941, 0.35294117647, "Infinite Fuel Mode 100 litres");
+  else if (fuel_rate_at_max_thrust == 0) {
+    s.str(""); s << "Infinite fuel (with " << fixed << fuel*FUEL_CAPACITY << " litres)";
+    draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 0.27058823529, 0.25882352941, 0.35294117647, s.str()); // Infinite fuel mode
+  }
   else draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 1.0, 0.0, 0.0, s.str());
 
   // Display simulation status
@@ -1014,11 +1017,9 @@ void draw_orbital_window (void)
     vector3d perp, current_colour;
     double theta, cos_theta, current_point_drag, current_point_velocity;
     
-    semi_major = r_p / (1 - eccentricity); // a on the elipse diagram
-    semi_minor = semi_major * sqrt(1 - pow(eccentricity, 2)); // b on the elipse diagram
     cos_theta = ((ang_momentum.abs2()/(pow(tot_mass, 2) * (GRAVITY * MARS_MASS) * position.abs())) - 1) / eccentricity;
     theta = acos(cos_theta); // theta in radians!
-    if (climb_speed > 0) theta += M_PI;
+    if (climb_speed > 0) theta = 2*M_PI - theta;
     
     perp = (position ^ velocity).norm();
     major_unit = cos(theta) * position.norm() + sin(theta) * (perp ^ position.norm()) + (1 - cos(theta)) * (perp * position.norm()) * perp;
@@ -1663,6 +1664,8 @@ void attitude_stabilization (void)
   double m[16];
   
   perp = (position ^ velocity).norm();
+//  cout << perp.abs() << "\t" << to_string(asin(perp.abs() / (position.abs() * velocity.abs()))) << endl;
+  if (asin(perp.abs() / (position.abs() * velocity.abs())) < 0.0001) perp = vector3d(0, 0, 1);
   up = cos(stabilized_attitude_angle * M_PI / 180) * position.norm() + sin(stabilized_attitude_angle * M_PI / 180) * (perp ^ position.norm()) + (1 - cos(stabilized_attitude_angle * M_PI / 180)) * (perp * position.norm()) * perp; // this is the direction we want the lander's nose to point in
 
   // !!!!!!!!!!!!! HINT TO STUDENTS ATTEMPTING THE EXTENSION EXERCISES !!!!!!!!!!!!!!
@@ -1996,6 +1999,15 @@ void instrument_mouse_button (int button, int state, int x, int y)
     
   }
 }
+
+double control_function(double x, double x1, double y1, double x2, double y2) {
+  double result;
+  if (x < x1) result = y1;
+  else if (x > x2) result = y2;
+  else result = ((y2-y1)/(x2-x1))*x + (y1 - ((y2-y1)/(x2-x1))*x1);
+  return result;
+}
+    
 
 void glut_special (int key, int x, int y)
   // Callback for special key presses in all windows

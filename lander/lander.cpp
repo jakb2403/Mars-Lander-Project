@@ -20,45 +20,86 @@ void autopilot (void)
   // INSERT YOUR CODE HERE
   // Enable altitude stabilisation
   stabilized_attitude = true;
-    
-  // Orbital re-entry sequence: if periapsis of current orbit greater than re-entry alt, then thrust to decease speed
-  if (r_p > (MARS_RADIUS+77500)) { // 99500
-    stabilized_attitude_angle = -90;
-    throttle = 1;
-  }
-  // Deploy parachute if lander under 70km and safe to deploy
-  else if (parachute_status == NOT_DEPLOYED && safe_to_deploy_parachute() && altitude < 70000) {
-    parachute_status = DEPLOYED;
+  fuel_rate_at_max_thrust = 0;
+  static bool reached_circular_orbit = false;
+  static bool reached_final_orbit = false;
+  double periapsis = MARS_RADIUS+200000;
+  double apoapsis = MARS_RADIUS+MARS_RADIUS;
+  double target_semi_major = 0.5 * (periapsis + apoapsis);
+  double target_eccentricity = 1 - (periapsis/target_semi_major);
+  double target_ground_speed = sqrt(GRAVITY * MARS_MASS / periapsis);
+  
+  cout << "e = " << eccentricity << "\ttarget_e = " << target_eccentricity << "\treached = " << reached_final_orbit << endl;
+//  cout << "e = " << eccentricity << "\tr_p = " << to_string(r_p-MARS_RADIUS) << "\tmed = " << to_string(((r_p+r_a)/2)-MARS_RADIUS) << "\tr_a = " << to_string(r_a-MARS_RADIUS) << "\tpercentage diff = " << to_string(((r_a-r_p)/r_p)*100) << "\tr = " << to_string(altitude) <<endl;
+  if (!reached_circular_orbit && !reached_final_orbit) {
+    if (eccentricity > 0.97 && position.abs() < (periapsis+2505579.999998770)/1.73) {
+      stabilized_attitude_angle = -15;
+      throttle = 1;
+    } else if (eccentricity > 0.001 && climb_speed >  0) {
+      stabilized_attitude_angle = -90 + atan(control_function(climb_speed, 0, 1, 2, 0)/(eccentricity))*180/M_PI;
+      throttle = 1;
+    } else {
+      stabilized_attitude_angle = 0;
+      throttle = 0;
+      reached_circular_orbit = true;
+    }
+  } else if (periapsis == apoapsis && reached_circular_orbit) {
     stabilized_attitude_angle = 0;
-  }
-  else {
-    double throttle_vert, throttle_horiz;
-    
-    // Calculate error term
-    double error = -(0.5 + K_h * altitude + (velocity * position.norm()));
-
-    // Calculate P_out
-    double P_out = K_p * error;
-    
-    // Calculate new downwards throttle level
-    if (P_out <= (-delta)) {
-      throttle_vert = 0;
-    } else if (P_out < (1 - delta)) {
-      throttle_vert = delta + P_out;
+    throttle = 0;
+    reached_final_orbit = true;
+  } else if (reached_circular_orbit && !reached_final_orbit) {
+    cout << "YEAAAAAH" << endl;
+    if (eccentricity < target_eccentricity) {
+      stabilized_attitude_angle = -90;
+      throttle = 1;
+      cout << "GET INNNNN" << endl;
     } else {
-      throttle_vert = 1;
+      reached_final_orbit = true;
     }
-    
-    if (altitude < 200 && ground_speed > 1) {
-      throttle_horiz = 0.2;
-      stabilized_attitude_angle = -atan(throttle_horiz / throttle_vert) * 180 / M_PI;
-//      cout << "vert = " << throttle_vert << "\thoriz = " << throttle_horiz <<  "\tangle = " << stabilized_attitude_angle <<  endl;
-    } else {
-      throttle_horiz = 0;
-    }
-
-    throttle = double (min(sqrt(pow(throttle_vert, 2) + pow(throttle_horiz, 2)), 1.0));
+  } else {
+    stabilized_attitude_angle = 0;
+    throttle = 0;
+    cout << "Yeah\tr_p = " << to_string(r_p) << "\tr_a = " << to_string(r_a) << "\tperi = " << to_string(periapsis) << "\tapo = " << to_string(apoapsis) << endl;
   }
+
+//  // Orbital re-entry sequence: if periapsis of current orbit greater than re-entry alt, then thrust to decease speed
+//  if (r_p > (MARS_RADIUS+77500)) { // 99500
+//    stabilized_attitude_angle = -90;
+//    throttle = 1;
+//  }
+//  // Deploy parachute if lander under 70km and safe to deploy
+//  else if (parachute_status == NOT_DEPLOYED && safe_to_deploy_parachute() && altitude < 70000) {
+//    parachute_status = DEPLOYED;
+//    stabilized_attitude_angle = 0;
+//  }
+//  else {
+//    double throttle_vert, throttle_horiz;
+//
+//    // Calculate error term
+//    double error = -(0.5 + K_h * altitude + (velocity * position.norm()));
+//
+//    // Calculate P_out
+//    double P_out = K_p * error;
+//
+//    // Calculate new downwards throttle level
+//    if (P_out <= (-delta)) {
+//      throttle_vert = 0;
+//    } else if (P_out < (1 - delta)) {
+//      throttle_vert = delta + P_out;
+//    } else {
+//      throttle_vert = 1;
+//    }
+//
+//    if (altitude < 200 && ground_speed > 1) {
+//      throttle_horiz = 0.2;
+//      stabilized_attitude_angle = -atan(throttle_horiz / throttle_vert) * 180 / M_PI;
+//      // cout << "vert = " << throttle_vert << "\thoriz = " << throttle_horiz <<  "\tangle = " << stabilized_attitude_angle <<  endl;
+//    } else {
+//      throttle_horiz = 0;
+//    }
+//
+//    throttle = double (min(sqrt(pow(throttle_vert, 2) + pow(throttle_horiz, 2)), 1.0));
+//   }
 }
 
 void numerical_dynamics (void)
@@ -110,6 +151,9 @@ void numerical_dynamics (void)
   orbit_energy = 0.5 * tot_mass * velocity.abs2() - (GRAVITY * MARS_MASS * tot_mass / position.abs());
   eccentricity = sqrt(1 + ((2 * orbit_energy * ang_momentum.abs2()) / (pow(tot_mass, 3) * pow((-GRAVITY * MARS_MASS), 2))));
   r_p = (ang_momentum.abs2() / (pow(tot_mass, 2) * (GRAVITY * MARS_MASS))) * (1 / (1 + eccentricity));
+  semi_major = r_p / (1 - eccentricity); // a on the elipse diagram
+  semi_minor = semi_major * sqrt(1 - pow(eccentricity, 2)); // b on the elipse diagram
+  r_a = 2*semi_major - r_p;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled) autopilot();

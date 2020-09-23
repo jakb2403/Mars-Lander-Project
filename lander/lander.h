@@ -211,7 +211,7 @@ unsigned long long time_program_started;
 // Lander state - the visualization routines use velocity_from_positions, so not sensitive to
 // any errors in the velocity update in numerical_dynamics
 vector3d position, orientation, velocity, velocity_from_positions, last_position, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
-double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p;
+double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p, r_a;
 bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj;
 parachute_status_t parachute_status;
 #warning vector below used for buttons (not working)
@@ -241,11 +241,12 @@ GLfloat straight_on[] = { 0.0, 0.0, 1.0, 0.0 };
 #else // extern declarations of those global variables used in lander.cpp
 
 extern bool stabilized_attitude, autopilot_enabled;
-extern double delta_t, simulation_time, throttle, fuel, altitude, K_h, K_p, delta, ground_speed, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor, r_p, orbit_energy;
+extern double delta_t, simulation_time, throttle, fuel, altitude, K_h, K_p, delta, ground_speed, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor, r_p, r_a, orbit_energy;
 extern unsigned short scenario;
 extern string scenario_description[];
 extern vector3d position, orientation, velocity, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
 extern parachute_status_t parachute_status;
+extern double fuel_rate_at_max_thrust;
 //extern indicator_lamp autopilot_lamp, att_stabilizer_lamp, parachute_lamp;
 
 #endif
@@ -300,3 +301,5 @@ void closeup_mouse_button (int button, int state, int x, int y);
 void closeup_mouse_motion (int x, int y);
 void glut_special (int key, int x, int y);
 void glut_key (unsigned char k, int x, int y);
+
+double control_function(double x, double x1, double y1, double x2, double y2);
