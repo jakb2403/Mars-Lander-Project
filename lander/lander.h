@@ -33,6 +33,10 @@
 #include <cstdlib>
 #include <vector>
 
+
+#include <string.h>
+#include <GL/glui.h>
+
 // GLUT mouse wheel operations work under Linux only
 #if !defined (GLUT_WHEEL_UP)
 #define GLUT_WHEEL_UP 3
@@ -180,7 +184,7 @@ struct closeup_coords_t {
 enum parachute_status_t { NOT_DEPLOYED = 0, DEPLOYED = 1, LOST = 2 };
 
 // Enumerated data type for autopilot status
-enum autopilot_status_t {OFF = 0, LAND_MODE = 1, INJECT_MODE = 2};
+enum autopilot_t {LAND_MODE = 0, INJECT_MODE = 1};
 
 #ifdef DECLARE_GLOBAL_VARIABLES // actual declarations of all global variables for lander_graphics.cpp
 
@@ -215,9 +219,10 @@ unsigned long long time_program_started;
 // any errors in the velocity update in numerical_dynamics
 vector3d position, orientation, velocity, velocity_from_positions, last_position, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
 double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p, r_a;
+int periapsis = MARS_RADIUS+100000,apoapsis = MARS_RADIUS+100000, autopilot_mode;
 bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj;
 parachute_status_t parachute_status;
-autopilot_status_t autopilot_status;
+//autopilot_t autopilot_mode;
 #warning vector below used for buttons (not working)
 vector<indicator_lamp*> indicator_lamps(3);
 
@@ -228,6 +233,11 @@ double fuel_rate_at_max_thrust = 0.5;
 double K_h = 0.019;
 double K_p = 2.0;
 double delta = 0.5;
+
+GLUI_Checkbox   *checkbox;
+GLUI_Spinner    *peri_spinner, *apo_spinner;
+GLUI_RadioGroup *radio;
+GLUI_EditText   *edittext;
 
 //Optimal values for 10km descent K_h = 0.025, K_p = 2.0, delta = 1.0
 
@@ -246,11 +256,12 @@ GLfloat straight_on[] = { 0.0, 0.0, 1.0, 0.0 };
 
 extern bool stabilized_attitude, autopilot_enabled;
 extern double delta_t, simulation_time, throttle, fuel, altitude, K_h, K_p, delta, ground_speed, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor, r_p, r_a, orbit_energy;
+extern int periapsis, apoapsis, autopilot_mode;
 extern unsigned short scenario;
 extern string scenario_description[];
 extern vector3d position, orientation, velocity, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
 extern parachute_status_t parachute_status;
-extern autopilot_status_t autopilot_status;
+//extern autopilot_t autopilot_mode;
 extern double fuel_rate_at_max_thrust;
 //extern indicator_lamp autopilot_lamp, att_stabilizer_lamp, parachute_lamp;
 

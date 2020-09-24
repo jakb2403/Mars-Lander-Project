@@ -67,8 +67,6 @@ void autopilot_inject(void) {
   fuel_rate_at_max_thrust = 0;
   static bool reached_circular_orbit = false;
   static bool reached_final_orbit = false;
-  double periapsis = MARS_RADIUS+200000;
-  double apoapsis = MARS_RADIUS+MARS_RADIUS;
   double target_semi_major = 0.5 * (periapsis + apoapsis);
   double target_eccentricity = 1 - (periapsis/target_semi_major);
 //  double target_ground_speed = sqrt(GRAVITY * MARS_MASS / periapsis);
@@ -161,7 +159,8 @@ void numerical_dynamics (void)
   r_a = 2*semi_major - r_p;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
-  if (autopilot_enabled) autopilot_land();
+  if (autopilot_enabled && autopilot_mode == 0) autopilot_land();
+  if (autopilot_enabled && autopilot_mode == 1) autopilot_inject();
 
   // Here we can apply 3-axis stabilization to ensure the base is always pointing downwards
   if (stabilized_attitude) attitude_stabilization();

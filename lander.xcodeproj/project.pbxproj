@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5E3679C6251D408300A946FA /* libglui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9AAE19251D33C3004082E2 /* libglui.a */; };
 		5EAB78C524F1412B0024432B /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EAB78C424F1412B0024432B /* GLUT.framework */; };
 		5EAB78C724F141330024432B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EAB78C624F141320024432B /* OpenGL.framework */; };
 		5EAB78CB24F141A10024432B /* lander.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5EAB78C824F141A10024432B /* lander.cpp */; };
@@ -14,6 +15,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		5E43F89A251CBAB5008583B3 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5EAB78B724F141070024432B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -26,9 +37,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5E9AAE19251D33C3004082E2 /* libglui.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libglui.a; path = ../../../../../usr/local/Cellar/glui/2.37/lib/libglui.a; sourceTree = "<group>"; };
 		5EAB78B924F141070024432B /* lander */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lander; sourceTree = BUILT_PRODUCTS_DIR; };
-		5EAB78C424F1412B0024432B /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
-		5EAB78C624F141320024432B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		5EAB78C424F1412B0024432B /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
+		5EAB78C624F141320024432B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		5EAB78C824F141A10024432B /* lander.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; path = lander.cpp; sourceTree = "<group>"; tabWidth = 2; };
 		5EAB78C924F141A10024432B /* lander.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lander.h; sourceTree = "<group>"; };
 		5EAB78CA24F141A10024432B /* lander_graphics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; path = lander_graphics.cpp; sourceTree = "<group>"; tabWidth = 2; };
@@ -41,6 +53,7 @@
 			files = (
 				5EAB78C724F141330024432B /* OpenGL.framework in Frameworks */,
 				5EAB78C524F1412B0024432B /* GLUT.framework in Frameworks */,
+				5E3679C6251D408300A946FA /* libglui.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +90,7 @@
 		5EAB78C324F1412B0024432B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5E9AAE19251D33C3004082E2 /* libglui.a */,
 				5EAB78C624F141320024432B /* OpenGL.framework */,
 				5EAB78C424F1412B0024432B /* GLUT.framework */,
 			);
@@ -93,6 +107,7 @@
 				5EAB78B524F141070024432B /* Sources */,
 				5EAB78B624F141070024432B /* Frameworks */,
 				5EAB78B724F141070024432B /* CopyFiles */,
+				5E43F89A251CBAB5008583B3 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -262,7 +277,19 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/glui/2.37/include,
+					/usr/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/glui/2.37/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -272,7 +299,19 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/glui/2.37/include,
+					/usr/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/glui/2.37/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
