@@ -179,6 +179,9 @@ struct closeup_coords_t {
 // Enumerated data type for parachute status
 enum parachute_status_t { NOT_DEPLOYED = 0, DEPLOYED = 1, LOST = 2 };
 
+// Enumerated data type for autopilot status
+enum autopilot_status_t {OFF = 0, LAND_MODE = 1, INJECT_MODE = 2};
+
 #ifdef DECLARE_GLOBAL_VARIABLES // actual declarations of all global variables for lander_graphics.cpp
 
 // GL windows and objects
@@ -214,6 +217,7 @@ vector3d position, orientation, velocity, velocity_from_positions, last_position
 double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p, r_a;
 bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj;
 parachute_status_t parachute_status;
+autopilot_status_t autopilot_status;
 #warning vector below used for buttons (not working)
 vector<indicator_lamp*> indicator_lamps(3);
 
@@ -246,6 +250,7 @@ extern unsigned short scenario;
 extern string scenario_description[];
 extern vector3d position, orientation, velocity, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
 extern parachute_status_t parachute_status;
+extern autopilot_status_t autopilot_status;
 extern double fuel_rate_at_max_thrust;
 //extern indicator_lamp autopilot_lamp, att_stabilizer_lamp, parachute_lamp;
 
@@ -288,7 +293,8 @@ bool safe_to_deploy_parachute (void);
 void update_visualization (void);
 void attitude_stabilization (void);
 vector3d thrust_wrt_world (void);
-void autopilot (void);
+void autopilot_land (void);
+void autopilot_inject (void);
 void numerical_dynamics (void);
 void initialize_simulation (void);
 void update_lander_state (void);
