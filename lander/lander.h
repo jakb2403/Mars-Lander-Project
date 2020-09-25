@@ -219,7 +219,8 @@ unsigned long long time_program_started;
 // any errors in the velocity update in numerical_dynamics
 vector3d position, orientation, velocity, velocity_from_positions, last_position, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
 double climb_speed, ground_speed, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p, r_a;
-int periapsis = MARS_RADIUS+100000,apoapsis = MARS_RADIUS+100000, autopilot_mode;
+float periapsis = MARS_RADIUS+100000,apoapsis = MARS_RADIUS+100000;
+int autopilot_mode = 0;
 bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj;
 parachute_status_t parachute_status;
 //autopilot_t autopilot_mode;
@@ -230,12 +231,12 @@ vector<indicator_lamp*> indicator_lamps(3);
 double fuel_rate_at_max_thrust = 0.5;
 
 // Set values of K_h, K_p and delta
-double K_h = 0.019;
-double K_p = 2.0;
-double delta = 0.5;
+float K_h = 0.019;
+float K_p = 2.0;
+float delta = 0.5;
 
 GLUI_Checkbox   *checkbox;
-GLUI_Spinner    *peri_spinner, *apo_spinner;
+GLUI_Spinner    *peri_spinner, *apo_spinner, *kh_spinner, *kp_spinner, *delta_spinner;
 GLUI_RadioGroup *radio;
 GLUI_EditText   *edittext;
 
@@ -255,8 +256,10 @@ GLfloat straight_on[] = { 0.0, 0.0, 1.0, 0.0 };
 #else // extern declarations of those global variables used in lander.cpp
 
 extern bool stabilized_attitude, autopilot_enabled;
-extern double delta_t, simulation_time, throttle, fuel, altitude, K_h, K_p, delta, ground_speed, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor, r_p, r_a, orbit_energy;
-extern int periapsis, apoapsis, autopilot_mode;
+extern double delta_t, simulation_time, throttle, fuel, altitude, ground_speed, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor, r_p, r_a, orbit_energy;
+extern short simulation_speed;
+extern float periapsis, apoapsis, K_h, K_p, delta;
+extern int autopilot_mode;
 extern unsigned short scenario;
 extern string scenario_description[];
 extern vector3d position, orientation, velocity, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum;
@@ -264,7 +267,6 @@ extern parachute_status_t parachute_status;
 //extern autopilot_t autopilot_mode;
 extern double fuel_rate_at_max_thrust;
 //extern indicator_lamp autopilot_lamp, att_stabilizer_lamp, parachute_lamp;
-
 #endif
 
 // Function prototypes
@@ -318,5 +320,8 @@ void closeup_mouse_button (int button, int state, int x, int y);
 void closeup_mouse_motion (int x, int y);
 void glut_special (int key, int x, int y);
 void glut_key (unsigned char k, int x, int y);
+void myGlutIdle(void);
+void control_bd(int control);
+void show_autopilot_controls (bool on);
 
 double control_function(double x, double x1, double y1, double x2, double y2);

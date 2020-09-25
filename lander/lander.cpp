@@ -23,7 +23,7 @@ void autopilot_land (void)
 
   // Orbital re-entry sequence: if periapsis of current orbit greater than re-entry alt, then thrust to decease speed
   if (r_p > (MARS_RADIUS+77500)) { // 99500
-    stabilized_attitude_angle = -90;
+    stabilized_attitude_angle = 90;
     throttle = 1;
   }
   // Deploy parachute if lander under 70km and safe to deploy
@@ -157,6 +157,7 @@ void numerical_dynamics (void)
   semi_major = r_p / (1 - eccentricity); // a on the elipse diagram
   semi_minor = semi_major * sqrt(1 - pow(eccentricity, 2)); // b on the elipse diagram
   r_a = 2*semi_major - r_p;
+
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled && autopilot_mode == 0) autopilot_land();

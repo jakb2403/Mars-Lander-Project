@@ -2120,6 +2120,11 @@ void glut_key (unsigned char k, int x, int y)
   case 'a': case 'A':
     // a or A - autopilot
     if (!landed) autopilot_enabled = !autopilot_enabled;
+    if (autopilot_enabled) {
+      show_autopilot_controls(false);
+      show_autopilot_controls(true);
+    }
+    else show_autopilot_controls(false);
     if (paused) refresh_all_subwindows();
     break;
 
@@ -2276,19 +2281,85 @@ void myGlutIdle( void )
 
 void control_cb( int control )
 {
-  /********************************************************************
-    Here we'll print the user id of the control that generated the
-    callback, and we'll also explicitly get the values of each control.
-    Note that we really didn't have to explicitly get the values, since
-    they are already all contained within the live variables:
-    'wireframe',  'segments',  'obj',  and 'text'
-    ********************************************************************/
-
+  switch (control){
+    case 1:
+      if (autopilot_mode == 0) {
+        kh_spinner->enable();
+        kp_spinner->enable();
+        delta_spinner->enable();
+        peri_spinner->disable();
+        apo_spinner->disable();
+      } else {
+        kh_spinner->disable();
+        kp_spinner->disable();
+        delta_spinner->disable();
+        peri_spinner->enable();
+        apo_spinner->enable();
+      }
+      break;
+    case 2:
+      break;
+    case 3:
+      break;
+    case 0:
+      glutIdleFunc(NULL);
+      if (paused && !landed) {
+        update_lander_state();
+        GLUI_Master.close_all();
+      }
+      else refresh_all_subwindows();
+      break;
+  }
+  
   printf( "callback: %d\n", control );
   printf( "    periapsis spinner: %d\n", peri_spinner->get_int_val() );
   printf( "     apoapsis spinner: %d\n", apo_spinner->get_int_val() );
   printf( "          radio group: %d\n", radio->get_int_val() );
-  
+}
+
+void show_autopilot_controls(bool on) {
+  // GLUI for autopilot control panel (to set autopilot mode)
+  if (on) {
+    simulation_speed = 0;
+    paused = true;
+    GLUI *glui = GLUI_Master.create_glui( "Autopilot Setup", 0, 50, 50 ); /* name flags, x, and y */
+
+    GLUI_Panel *main_panel = new GLUI_Panel( glui, "", GLUI_PANEL_NONE );
+    GLUI_Panel *mode_panel = new GLUI_Panel( main_panel, "Autopilot Mode" );
+    radio = new GLUI_RadioGroup( mode_panel,&autopilot_mode,1, control_cb);
+    new GLUI_RadioButton( radio, "Landing Mode" );
+    new GLUI_RadioButton( radio, "Orbital Injection Mode" );
+    
+    new GLUI_Column( main_panel, false );
+    GLUI_Panel *land_panel = new GLUI_Panel( main_panel, "Landing Mode" );
+    kh_spinner = new GLUI_Spinner( land_panel, "K_h:", &K_h, 2, control_cb);
+    kh_spinner->set_float_limits(0 , 1);
+    kp_spinner = new GLUI_Spinner( land_panel, "K_p:", &K_p, 2, control_cb);
+    kp_spinner->set_float_limits(0 , 5);
+    delta_spinner = new GLUI_Spinner( land_panel, "delta:", &delta, 2, control_cb);
+    delta_spinner->set_float_limits(0 , 2);
+    
+    GLUI_Panel *inject_panel = new GLUI_Panel( main_panel, "Orbital Injection Mode" );
+    peri_spinner = new GLUI_Spinner( inject_panel, "Periapsis (m):", &periapsis, 3, control_cb);
+    peri_spinner->set_int_limits(3486000 , 103386000);
+    apo_spinner = new GLUI_Spinner( inject_panel, "Apoapsis (m):", &apoapsis, 3, control_cb);
+    apo_spinner->set_int_limits(3486000 , 103386000);
+    peri_spinner->disable();
+    apo_spinner->disable();
+    
+    new GLUI_Button( glui, "Start Autopilot", 0,control_cb );
+   
+    glui->set_main_gfx_window( main_window );
+
+    /* We register the idle callback with GLUI, *not* with GLUT */
+    //GLUI_Master.set_glutIdleFunc( myGlutIdle );
+    GLUI_Master.set_glutIdleFunc( NULL );
+  } else {
+    try {
+      GLUI_Master.close_all();
+    }
+    catch (...) {}
+  }
 }
 
 int main (int argc, char* argv[])
@@ -2378,37 +2449,6 @@ int main (int argc, char* argv[])
   // Generate the random number table
   srand(0);
   for (i=0; i<N_RAND; i++) randtab[i] = (float)rand()/RAND_MAX;
-
-//  GLUI *glui = GLUI_Master.create_glui( "GLUI" );
-//  new GLUI_Checkbox( glui, "Wireframe", &wireframe );
-//  (new GLUI_Spinner( glui, "Segments:", &segments ))
-//    ->set_int_limits( 3, 60 );
-   
-//  glui->set_main_gfx_window( main_window );
-
-//  /* We register the idle callback with GLUI, *not* with GLUT */
-//  GLUI_Master.set_glutIdleFunc( myGlutIdle );
-  
-  GLUI *glui = GLUI_Master.create_glui( "GLUI", 0, 400, 50 ); /* name, flags,
-                 x, and y */
-  new GLUI_StaticText( glui, "Autopilot Control Panel" );
-  new GLUI_Separator( glui );
-  GLUI_Panel *mode_panel = new GLUI_Panel( glui, "Autopilot Mode" );
-  radio = new GLUI_RadioGroup( mode_panel,&autopilot_mode,1,control_cb );
-  new GLUI_RadioButton( radio, "Landing Mode" );
-  new GLUI_RadioButton( radio, "Orbital Injection Mode" );
-  peri_spinner = new GLUI_Spinner( glui, "Periapsis (m):", &periapsis, 2, control_cb );
-  peri_spinner->set_int_limits(3486000 , 103386000);
-  apo_spinner = new GLUI_Spinner( glui, "Apoapsis (m):", &apoapsis, 3, control_cb );
-  apo_spinner->set_int_limits(3486000 , 103386000);
-  
-  new GLUI_Button( glui, "Quit", 0,(GLUI_Update_CB)exit );
- 
-  glui->set_main_gfx_window( main_window );
-
-  /* We register the idle callback with GLUI, *not* with GLUT */
-  //GLUI_Master.set_glutIdleFunc( myGlutIdle );
-  GLUI_Master.set_glutIdleFunc( NULL );
   
   // Initialize the simulation state
   reset_simulation();
