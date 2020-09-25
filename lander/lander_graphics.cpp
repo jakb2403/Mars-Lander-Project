@@ -765,6 +765,14 @@ void draw_instrument_window (void)
   glut_print(view_width+GAP+240, INSTRUMENT_HEIGHT-137, s.str());
   s.str(""); s << "velocity " << fixed << velocity_from_positions.z << " m/s";
   glut_print(view_width+GAP+380, INSTRUMENT_HEIGHT-137, s.str());
+  if (autopilot_enabled && autopilot_mode == 0) {
+    s.str(""); s << "K_h = " << fixed << to_string(K_h).substr(0,5);
+    glut_print(view_width+GAP+240, INSTRUMENT_HEIGHT-157, s.str());
+    s.str(""); s << "K_p = " << fixed << to_string(K_p).substr(0,5);
+    glut_print(view_width+GAP+310, INSTRUMENT_HEIGHT-157, s.str());
+    s.str(""); s << "delta = " << fixed << to_string(delta).substr(0,5);
+    glut_print(view_width+GAP+380, INSTRUMENT_HEIGHT-157, s.str());
+  }
 
   // Draw thrust bar
   s.str(""); s << "Thrust " << fixed << thrust_wrt_world().abs() << " N";
@@ -784,12 +792,11 @@ void draw_instrument_window (void)
   if (landed) glColor3f(1.0, 1.0, 0.0);
   else glColor3f(1.0, 1.0, 1.0);
   s.str(""); s << "Scenario " << scenario;
-  if (autopilot_enabled && autopilot_mode == 0) s << " K_h=" << to_string(K_h).substr(0,5) << " K_p=" << to_string(K_p).substr(0,5) << " delta=" << to_string(delta).substr(0,5);
-  glut_print(view_width+GAP-488, 17, s.str());
   if (!landed) {
-    s.str(""); s << scenario_description[scenario];
+    s << scenario_description[scenario];
     glut_print(view_width+GAP-488, 2, s.str());
   }
+  glut_print(view_width+GAP-488, 17, s.str());
   if (landed) {
     if (altitude < LANDER_SIZE/2.0) glut_print(80, 17, "Lander is below the surface!");
     else {
@@ -2300,6 +2307,13 @@ void control_cb( int control )
     case 2:
       break;
     case 3:
+      if (periapsis > apoapsis) {
+        error_text->name = "Error: Periapsis < Apoapsis";
+        start_button->disable();
+      } else {
+        error_text->name = "";
+        start_button->enable();
+      }
       break;
     case 4:
       glutIdleFunc(NULL);
@@ -2355,17 +2369,21 @@ void show_autopilot_controls(bool on) {
     delta_spinner->set_float_limits(0 , 2);
     
     GLUI_Panel *inject_panel = new GLUI_Panel( main_panel, "Orbital Injection Mode" );
-    peri_spinner = new GLUI_Spinner( inject_panel, "Periapsis (m):", &periapsis, 3, control_cb);
+    inject_panel->set_w(200);
+    peri_spinner = new GLUI_Spinner( inject_panel, "Periapsis(m):", &periapsis, 3, control_cb);
     peri_spinner->set_int_limits(3486000 , 103386000);
-    apo_spinner = new GLUI_Spinner( inject_panel, "Apoapsis (m):", &apoapsis, 3, control_cb);
+    apo_spinner = new GLUI_Spinner( inject_panel, "Apoapsis(m):", &apoapsis, 3, control_cb);
     apo_spinner->set_int_limits(3486000 , 103386000);
+    error_text = new GLUI_StaticText( inject_panel, "" );
+    
+    error_text->name = "";
     peri_spinner->disable();
     apo_spinner->disable();
     
     GLUI_Panel *button_panel = new GLUI_Panel( glui, "", GLUI_PANEL_NONE );
     new GLUI_Button( button_panel, "Cancel", 4,control_cb );
     new GLUI_Column( button_panel, false );
-    new GLUI_Button( button_panel, "Start Autopilot", 5,control_cb );
+    start_button = new GLUI_Button( button_panel, "Start Autopilot", 5,control_cb );
    
     glui->set_main_gfx_window( main_window );
 
