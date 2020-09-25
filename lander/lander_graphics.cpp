@@ -784,8 +784,12 @@ void draw_instrument_window (void)
   if (landed) glColor3f(1.0, 1.0, 0.0);
   else glColor3f(1.0, 1.0, 1.0);
   s.str(""); s << "Scenario " << scenario;
-  if (!landed) s << ": " << scenario_description[scenario];
+  if (autopilot_enabled && autopilot_mode == 0) s << " K_h=" << to_string(K_h).substr(0,5) << " K_p=" << to_string(K_p).substr(0,5) << " delta=" << to_string(delta).substr(0,5);
   glut_print(view_width+GAP-488, 17, s.str());
+  if (!landed) {
+    s.str(""); s << scenario_description[scenario];
+    glut_print(view_width+GAP-488, 2, s.str());
+  }
   if (landed) {
     if (altitude < LANDER_SIZE/2.0) glut_print(80, 17, "Lander is below the surface!");
     else {
@@ -1982,12 +1986,8 @@ void instrument_mouse_button (int button, int state, int x, int y)
     if (state == GLUT_UP) {
       last_click_x = x;
       last_click_y = y;
-      cout << "x = " << last_click_x << "\ty=" << last_click_y << endl;
       for (auto lamp : indicator_lamps) {
         if (lamp->is_clicked(last_click_x, last_click_y)){
-          cout << "YEAH " << endl;\
-          cout << lamp->on_text << endl;
-          cout << lamp->on << endl;
           lamp->on = !lamp->on;
         }
       }
@@ -2301,7 +2301,16 @@ void control_cb( int control )
       break;
     case 3:
       break;
-    case 0:
+    case 4:
+      glutIdleFunc(NULL);
+      if (paused && !landed) {
+        autopilot_enabled = false;
+        update_lander_state();
+        GLUI_Master.close_all();
+      }
+      else refresh_all_subwindows();
+      break;
+    case 5:
       glutIdleFunc(NULL);
       if (paused && !landed) {
         update_lander_state();
@@ -2320,16 +2329,22 @@ void control_cb( int control )
 void show_autopilot_controls(bool on) {
   // GLUI for autopilot control panel (to set autopilot mode)
   if (on) {
+    // Pause simulation while autopilot is being setup
     simulation_speed = 0;
     paused = true;
+    
     GLUI *glui = GLUI_Master.create_glui( "Autopilot Setup", 0, 50, 50 ); /* name flags, x, and y */
-
+    
+    // Create main panel to hold all the objects
     GLUI_Panel *main_panel = new GLUI_Panel( glui, "", GLUI_PANEL_NONE );
+    
+    // Create left hand panel
     GLUI_Panel *mode_panel = new GLUI_Panel( main_panel, "Autopilot Mode" );
     radio = new GLUI_RadioGroup( mode_panel,&autopilot_mode,1, control_cb);
     new GLUI_RadioButton( radio, "Landing Mode" );
     new GLUI_RadioButton( radio, "Orbital Injection Mode" );
     
+    // Create second column and right hand panels
     new GLUI_Column( main_panel, false );
     GLUI_Panel *land_panel = new GLUI_Panel( main_panel, "Landing Mode" );
     kh_spinner = new GLUI_Spinner( land_panel, "K_h:", &K_h, 2, control_cb);
@@ -2347,7 +2362,10 @@ void show_autopilot_controls(bool on) {
     peri_spinner->disable();
     apo_spinner->disable();
     
-    new GLUI_Button( glui, "Start Autopilot", 0,control_cb );
+    GLUI_Panel *button_panel = new GLUI_Panel( glui, "", GLUI_PANEL_NONE );
+    new GLUI_Button( button_panel, "Cancel", 4,control_cb );
+    new GLUI_Column( button_panel, false );
+    new GLUI_Button( button_panel, "Start Autopilot", 5,control_cb );
    
     glui->set_main_gfx_window( main_window );
 

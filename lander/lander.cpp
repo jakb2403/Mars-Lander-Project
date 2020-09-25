@@ -90,18 +90,15 @@ void autopilot_inject(void) {
     throttle = 0;
     reached_final_orbit = true;
   } else if (reached_circular_orbit && !reached_final_orbit) {
-    cout << "YEAAAAAH" << endl;
     if (eccentricity < target_eccentricity) {
       stabilized_attitude_angle = -90;
       throttle = 1;
-      cout << "GET INNNNN" << endl;
     } else {
       reached_final_orbit = true;
     }
   } else {
     stabilized_attitude_angle = 0;
     throttle = 0;
-    cout << "Yeah\tr_p = " << to_string(r_p) << "\tr_a = " << to_string(r_a) << "\tperi = " << to_string(periapsis) << "\tapo = " << to_string(apoapsis) << endl;
   }
 }
 
