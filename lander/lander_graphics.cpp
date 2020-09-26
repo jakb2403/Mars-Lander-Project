@@ -766,11 +766,18 @@ void draw_instrument_window (void)
   s.str(""); s << "velocity " << fixed << velocity_from_positions.z << " m/s";
   glut_print(view_width+GAP+380, INSTRUMENT_HEIGHT-137, s.str());
   if (autopilot_enabled && autopilot_mode == 0) {
+    glColor3f(1.0, 1.0, 0.0);
     s.str(""); s << "K_h = " << fixed << to_string(K_h).substr(0,5);
     glut_print(view_width+GAP+240, INSTRUMENT_HEIGHT-157, s.str());
     s.str(""); s << "K_p = " << fixed << to_string(K_p).substr(0,5);
     glut_print(view_width+GAP+310, INSTRUMENT_HEIGHT-157, s.str());
     s.str(""); s << "delta = " << fixed << to_string(delta).substr(0,5);
+    glut_print(view_width+GAP+380, INSTRUMENT_HEIGHT-157, s.str());
+  } else if (autopilot_enabled && autopilot_mode == 1) {
+    glColor3f(1.0, 1.0, 0.0);
+    s.str(""); s << "Periapsis = " << fixed << to_string(periapsis) << " m";
+    glut_print(view_width+GAP+240, INSTRUMENT_HEIGHT-157, s.str());
+    s.str(""); s << "Apoapsis = " << fixed << to_string(apoapsis) << " m";
     glut_print(view_width+GAP+380, INSTRUMENT_HEIGHT-157, s.str());
   }
 
@@ -792,10 +799,7 @@ void draw_instrument_window (void)
   if (landed) glColor3f(1.0, 1.0, 0.0);
   else glColor3f(1.0, 1.0, 1.0);
   s.str(""); s << "Scenario " << scenario;
-  if (!landed) {
-    s << scenario_description[scenario];
-    glut_print(view_width+GAP-488, 2, s.str());
-  }
+  if (!landed) s << ": " << scenario_description[scenario];
   glut_print(view_width+GAP-488, 17, s.str());
   if (landed) {
     if (altitude < LANDER_SIZE/2.0) glut_print(80, 17, "Lander is below the surface!");
@@ -1673,10 +1677,20 @@ void attitude_stabilization (void)
 {
   vector3d up, left, out, perp;
   double m[16];
+  srand(time(NULL));
   
   perp = (position ^ velocity).norm();
 //  cout << perp.abs() << "\t" << to_string(asin(perp.abs() / (position.abs() * velocity.abs()))) << endl;
-  if (asin(perp.abs() / (position.abs() * velocity.abs())) < 0.0001) perp = vector3d(0, 0, 1);
+  if (asin(perp.abs() / (position.abs() * velocity.abs())) < 0.0001 && autopilot_mode == 1) {
+    if (scenario ==3) {
+//      perp = (vector3d((rand() % 100 + 1),(rand() % 100 + 1),(rand() % 100 + 1)) ^ position).norm();
+      perp = (vector3d(97,53,46) ^ position).norm();
+    } else {
+      perp = vector3d(0, 0, 1);
+    }
+  }
+//  cout << "pos " << position.norm() << endl;
+//  cout << perp << endl;
   up = cos(stabilized_attitude_angle * M_PI / 180) * position.norm() + sin(stabilized_attitude_angle * M_PI / 180) * (perp ^ position.norm()) + (1 - cos(stabilized_attitude_angle * M_PI / 180)) * (perp * position.norm()) * perp; // this is the direction we want the lander's nose to point in
 
   // !!!!!!!!!!!!! HINT TO STUDENTS ATTEMPTING THE EXTENSION EXERCISES !!!!!!!!!!!!!!
@@ -2354,6 +2368,10 @@ void show_autopilot_controls(bool on) {
     
     // Create left hand panel
     GLUI_Panel *mode_panel = new GLUI_Panel( main_panel, "Autopilot Mode" );
+    scenario_text = new GLUI_StaticText( mode_panel, "Landing Mode is recommended for this scenario" );
+    if (scenario == 1 || scenario == 3 || scenario == 5) {
+      scenario_text->name = "You can use both modes in this scenario";
+    }
     radio = new GLUI_RadioGroup( mode_panel,&autopilot_mode,1, control_cb);
     new GLUI_RadioButton( radio, "Landing Mode" );
     new GLUI_RadioButton( radio, "Orbital Injection Mode" );
@@ -2368,11 +2386,12 @@ void show_autopilot_controls(bool on) {
     delta_spinner = new GLUI_Spinner( land_panel, "delta:", &delta, 2, control_cb);
     delta_spinner->set_float_limits(0 , 2);
     
-    GLUI_Panel *inject_panel = new GLUI_Panel( main_panel, "Orbital Injection Mode" );
-    inject_panel->set_w(200);
+    GLUI_Panel *inject_panel = new GLUI_Panel( main_panel, "Orbital Injection Mode           " );
     peri_spinner = new GLUI_Spinner( inject_panel, "Periapsis(m):", &periapsis, 3, control_cb);
+    peri_spinner->set_w(400);
     peri_spinner->set_int_limits(3486000 , 103386000);
     apo_spinner = new GLUI_Spinner( inject_panel, "Apoapsis(m):", &apoapsis, 3, control_cb);
+    apo_spinner->set_w(400);
     apo_spinner->set_int_limits(3486000 , 103386000);
     error_text = new GLUI_StaticText( inject_panel, "" );
     

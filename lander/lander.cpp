@@ -23,7 +23,7 @@ void autopilot_land (void)
 
   // Orbital re-entry sequence: if periapsis of current orbit greater than re-entry alt, then thrust to decease speed
   if (r_p > (MARS_RADIUS+77500)) { // 99500
-    stabilized_attitude_angle = 90;
+    stabilized_attitude_angle = -90;
     throttle = 1;
   }
   // Deploy parachute if lander under 70km and safe to deploy
@@ -65,20 +65,18 @@ void autopilot_inject(void) {
   
   stabilized_attitude = true;
   fuel_rate_at_max_thrust = 0;
-  static bool reached_circular_orbit = false;
-  static bool reached_final_orbit = false;
   double target_semi_major = 0.5 * (periapsis + apoapsis);
   double target_eccentricity = 1 - (periapsis/target_semi_major);
 //  double target_ground_speed = sqrt(GRAVITY * MARS_MASS / periapsis);
   
-//  cout << "e = " << eccentricity << "\ttarget_e = " << target_eccentricity << "\treached = " << reached_final_orbit << endl;
+  cout << "e = " << eccentricity << "\ttarget_e = " << target_eccentricity << "\treached_circular = " << reached_circular_orbit << "\treached_final = " << reached_final_orbit << endl;
 //  cout << "e = " << eccentricity << "\tr_p = " << to_string(r_p-MARS_RADIUS) << "\tmed = " << to_string(((r_p+r_a)/2)-MARS_RADIUS) << "\tr_a = " << to_string(r_a-MARS_RADIUS) << "\tpercentage diff = " << to_string(((r_a-r_p)/r_p)*100) << "\tr = " << to_string(altitude) <<endl;
   if (!reached_circular_orbit && !reached_final_orbit) {
     if (eccentricity > 0.97 && position.abs() < (periapsis+2505579.999998770)/1.73) {
       stabilized_attitude_angle = -15;
       throttle = 1;
     } else if (eccentricity > 0.001 && climb_speed >  0) {
-      stabilized_attitude_angle = -90 + atan(control_function(climb_speed, 0, 1, 2, 0)/(eccentricity))*180/M_PI;
+      stabilized_attitude_angle = -90 + atan(control_function(climb_speed, 0, 1, 3, 0)/(eccentricity))*180/M_PI;
       throttle = 1;
     } else {
       stabilized_attitude_angle = 0;
@@ -199,6 +197,8 @@ void initialize_simulation (void)
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = false;
     autopilot_enabled = false;
+    reached_circular_orbit = false;
+    reached_final_orbit = false;
     break;
 
   case 1:
@@ -210,6 +210,8 @@ void initialize_simulation (void)
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = true;
     autopilot_enabled = false;
+    reached_circular_orbit = false;
+    reached_final_orbit = false;
     break;
 
   case 2:
@@ -221,6 +223,8 @@ void initialize_simulation (void)
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = false;
     autopilot_enabled = false;
+    reached_circular_orbit = false;
+    reached_final_orbit = false;
     break;
 
   case 3:
@@ -232,6 +236,8 @@ void initialize_simulation (void)
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = false;
     autopilot_enabled = false;
+    reached_circular_orbit = false;
+    reached_final_orbit = false;
     break;
 
   case 4:
@@ -243,6 +249,8 @@ void initialize_simulation (void)
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = false;
     autopilot_enabled = false;
+    reached_circular_orbit = false;
+    reached_final_orbit = false;
     break;
 
   case 5:
@@ -254,6 +262,8 @@ void initialize_simulation (void)
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = true;
     autopilot_enabled = false;
+    reached_circular_orbit = false;
+    reached_final_orbit = false;
     break;
 
   case 6:
@@ -265,6 +275,8 @@ void initialize_simulation (void)
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = true;
     autopilot_enabled = false;
+    reached_circular_orbit = false;
+    reached_final_orbit = false;
     break;
 
   case 7:
