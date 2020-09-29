@@ -909,11 +909,12 @@ void display_help_text (void)
   glut_print(20, view_height-210, "p - deploy parachute");
   glut_print(20, view_height-225, "a - toggle autopilot");
   glut_print(20, view_height-240, "o - show predicted trajectory");
+  glut_print(20, view_height-255, "i - toggle infinite fuel mode");
 
-  glut_print(20, view_height-260, "l - toggle lighting model");
-  glut_print(20, view_height-275, "t - toggle terrain texture");
-  glut_print(20, view_height-290, "h - toggle help");
-  glut_print(20, view_height-305, "Esc/q - quit");
+  glut_print(20, view_height-270, "l - toggle lighting model");
+  glut_print(20, view_height-285, "t - toggle terrain texture");
+  glut_print(20, view_height-300, "h - toggle help");
+  glut_print(20, view_height-315, "Esc/q - quit");
 
   j = 0;
   for (i=0; i<10; i++) {
