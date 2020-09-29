@@ -220,13 +220,10 @@ unsigned long long time_program_started;
 // any errors in the velocity update in numerical_dynamics
 vector3d position, orientation, velocity, velocity_from_positions, last_position, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum, velocity_wrt_atm;
 double climb_speed, ground_speed_wrt_mars, ground_speed_abs, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p, r_a, theta, cos_theta;
-int periapsis = MARS_RADIUS+100000,apoapsis = MARS_RADIUS+100000;
+int periapsis = MARS_RADIUS+100000,apoapsis = MARS_RADIUS+100000, circular_orbit;
 int autopilot_mode = 0;
 bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj, reached_circular_orbit, reached_final_orbit;
 parachute_status_t parachute_status;
-//autopilot_t autopilot_mode;
-#warning vector below used for buttons (not working)
-vector<indicator_lamp*> indicator_lamps(3);
 
 // Define fuel rate at max thrust that is not a const so that it can be changed for infinite fuel mode
 double fuel_rate_at_max_thrust = 0.5;
@@ -236,8 +233,10 @@ float K_h = 0.019;
 float K_p = 2.0;
 float delta = 0.5;
 
-GLUI_Checkbox   *checkbox;
-GLUI_Spinner    *peri_spinner, *apo_spinner, *kh_spinner, *kp_spinner, *delta_spinner;
+GLUI            *glui;
+GLUI_Checkbox   *circular_checkbox;
+GLUI_EditText   *peri_spinner, *apo_spinner;
+GLUI_Spinner    *kh_spinner, *kp_spinner, *delta_spinner;
 GLUI_RadioGroup *radio;
 GLUI_RadioButton*orbit_radio;
 GLUI_Button     *start_button;

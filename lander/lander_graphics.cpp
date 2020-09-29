@@ -686,9 +686,14 @@ void draw_instrument_window (void)
   draw_dial (view_width+GAP-400, (INSTRUMENT_HEIGHT/2)+10, altitude, "Altitude", "m");
 
   // Draw auto-pilot lamp
-//  draw_indicator_lamp (view_width+GAP-400, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled);
+
   indicator_lamp auto_pilot_lamp = indicator_lamp(view_width+GAP-200, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled, 140, 20);
   auto_pilot_lamp.on = autopilot_enabled;
+  if (autopilot_mode == 0) {
+    auto_pilot_lamp.on_text = "Auto-pilot on : Landing";
+  } else {
+    auto_pilot_lamp.on_text = "Auto-pilot on : Injecting";
+  }
   auto_pilot_lamp.draw();
   
   // Draw predicted trajectory lamp
@@ -701,7 +706,6 @@ void draw_instrument_window (void)
   else draw_dial (view_width+GAP-150, (INSTRUMENT_HEIGHT/2)+10, landed ? 0.0 : -climb_speed, "Descent rate", "m/s");
 
   // Draw attitude stabilizer lamp
-//  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
   indicator_lamp att_stabilizer_lamp = indicator_lamp(view_width+GAP-50, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, 140, 20, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
   att_stabilizer_lamp.on = stabilized_attitude;
   att_stabilizer_lamp.draw();
@@ -715,21 +719,18 @@ void draw_instrument_window (void)
   indicator_lamp parachute_lamp = indicator_lamp(view_width+GAP+100, INSTRUMENT_HEIGHT-18, "", "", true, 140, 20);
   switch (parachute_status) {
   case NOT_DEPLOYED:
-//    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "Parachute not deployed", "Do not deploy parachute", !safe_to_deploy_parachute());
     parachute_lamp.off_text = "Parachute not deployed";
     parachute_lamp.on_text = "Do not deploy parachute";
     parachute_lamp.on = !safe_to_deploy_parachute();
     parachute_lamp.draw();
     break;
   case DEPLOYED:
-//    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "Parachute deployed", "", false);
     parachute_lamp.off_text = "Parachute deployed";
     parachute_lamp.on_text = "";
     parachute_lamp.on = false;
     parachute_lamp.draw();
     break;
   case LOST:
-//    draw_indicator_lamp (view_width+GAP+100, INSTRUMENT_HEIGHT-18, "", "Parachute lost", true);
     parachute_lamp.off_text = "";
     parachute_lamp.on_text = "Parachute lost";
     parachute_lamp.on = true;
@@ -737,9 +738,7 @@ void draw_instrument_window (void)
     break;
   }
 
-  indicator_lamps[0] = &auto_pilot_lamp;
-  indicator_lamps[1] = &att_stabilizer_lamp;
-  indicator_lamps[2] = &parachute_lamp;
+
   
   // Draw speed bar
   draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-18, simulation_speed/10.0, 0.0, 0.0, 1.0, "Simulation speed");
@@ -793,7 +792,7 @@ void draw_instrument_window (void)
   else if (fuel > 0.2 && fuel_rate_at_max_thrust!=0) draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 1.0, 0.5, 0.0, s.str());
   else if (fuel_rate_at_max_thrust == 0) {
     s.str(""); s << "Infinite fuel (with " << fixed << fuel*FUEL_CAPACITY << " litres)";
-    draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 0.27058823529, 0.25882352941, 0.35294117647, s.str()); // Infinite fuel mode
+    draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 1.0, 1.0, 0, s.str()); // Infinite fuel mode
   }
   else draw_control_bar(view_width+GAP+240, INSTRUMENT_HEIGHT-242, fuel, 1.0, 0.0, 0.0, s.str());
 
@@ -909,11 +908,12 @@ void display_help_text (void)
   glut_print(20, view_height-195, "s - toggle attitude stabilizer");
   glut_print(20, view_height-210, "p - deploy parachute");
   glut_print(20, view_height-225, "a - toggle autopilot");
+  glut_print(20, view_height-240, "o - show predicted trajectory");
 
-  glut_print(20, view_height-245, "l - toggle lighting model");
-  glut_print(20, view_height-260, "t - toggle terrain texture");
-  glut_print(20, view_height-275, "h - toggle help");
-  glut_print(20, view_height-290, "Esc/q - quit");
+  glut_print(20, view_height-260, "l - toggle lighting model");
+  glut_print(20, view_height-275, "t - toggle terrain texture");
+  glut_print(20, view_height-290, "h - toggle help");
+  glut_print(20, view_height-305, "Esc/q - quit");
 
   j = 0;
   for (i=0; i<10; i++) {
@@ -1039,9 +1039,7 @@ void draw_orbital_window (void)
     perp = (position ^ velocity).norm();
     major_unit = cos(theta) * position.norm() + sin(theta) * (perp ^ position.norm()) + (1 - cos(theta)) * (perp * position.norm()) * perp;
     minor_unit = perp ^ major_unit;
-      
-  //  cout << "r_p = " << r_p << "\tmajor = " << semi_major << "\tminor = " << semi_minor << "\ttheta = " << theta << "= " << (theta * 180 / M_PI) << " deg" << "\te = " << eccentricity << "\tenergy = " << orbit_energy << endl;
-    
+          
     glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
     glLineWidth(1.0);
@@ -1691,8 +1689,7 @@ void attitude_stabilization (void)
       perp = vector3d(0, 0, 1);
     }
   }
-//  cout << "pos " << position.norm() << endl;
-//  cout << perp << endl;
+
   up = cos(stabilized_attitude_angle * M_PI / 180) * position.norm() + sin(stabilized_attitude_angle * M_PI / 180) * (perp ^ position.norm()) + (1 - cos(stabilized_attitude_angle * M_PI / 180)) * (perp * position.norm()) * perp; // this is the direction we want the lander's nose to point in
 
   // !!!!!!!!!!!!! HINT TO STUDENTS ATTEMPTING THE EXTENSION EXERCISES !!!!!!!!!!!!!!
@@ -1800,6 +1797,9 @@ void reset_simulation (void)
   throttle = 0.0;
   fuel = 1.0;
   autopilot_mode = 0;
+  K_h = 0.019;
+  K_p = 2.0;
+  delta = 0.5;
   
   // Restore initial lander state
   initialize_simulation();
@@ -2002,27 +2002,6 @@ void closeup_mouse_motion (int x, int y)
   if (paused || landed) refresh_all_subwindows();
 }
 
-#warning Clicking in instrument panel not working
-void instrument_mouse_button (int button, int state, int x, int y)
-  // Callback for mouse button presses in the orbital view window
-{
-  if (button == GLUT_LEFT_BUTTON) {
-    if (state == GLUT_UP) {
-      last_click_x = x;
-      last_click_y = y;
-      for (auto lamp : indicator_lamps) {
-        if (lamp->is_clicked(last_click_x, last_click_y)){
-          lamp->on = !lamp->on;
-        }
-      }
-    }
-    if (state == GLUT_DOWN) {
-      last_click_x = -1;
-      last_click_y = -1;
-    }
-    
-  }
-}
 
 double control_function(double x, double x1, double y1, double x2, double y2) {
   double result;
@@ -2203,41 +2182,41 @@ void glut_key (unsigned char k, int x, int y)
     paused = true;
     break;
   
-  case '=': case '+':
-    // increase K_h
-      if (autopilot_enabled && !landed) {
-        K_h += 0.0001;
-        cout << "K_h = " << K_h << endl;
-      }
-    if (paused) refresh_all_subwindows();
-    break;
-      
-  case '-': case '_':
-    // decrease K_h
-    if (autopilot_enabled && !landed) {
-      K_h -= 0.0001;
-      cout << "K_h = " << K_h << endl;
-    }
-    if (paused) refresh_all_subwindows();
-    break;
-      
-  case ']': case '}':
-    // increase K_p
-    if (autopilot_enabled && !landed) {
-      K_p += 0.1;
-      cout << "K_p = " << K_p << endl;
-    }
-    if (paused) refresh_all_subwindows();
-    break;
-      
-  case '[': case '{':
-    // decrease K_p
-    if (autopilot_enabled && !landed) {
-      K_p -= 0.1;
-      cout << "K_p = " << K_p << endl;
-    }
-    if (paused) refresh_all_subwindows();
-    break;
+//  case '=': case '+':
+//    // increase K_h
+//      if (autopilot_enabled && !landed) {
+//        K_h += 0.0001;
+//        cout << "K_h = " << K_h << endl;
+//      }
+//    if (paused) refresh_all_subwindows();
+//    break;
+//
+//  case '-': case '_':
+//    // decrease K_h
+//    if (autopilot_enabled && !landed) {
+//      K_h -= 0.0001;
+//      cout << "K_h = " << K_h << endl;
+//    }
+//    if (paused) refresh_all_subwindows();
+//    break;
+//
+//  case ']': case '}':
+//    // increase K_p
+//    if (autopilot_enabled && !landed) {
+//      K_p += 0.1;
+//      cout << "K_p = " << K_p << endl;
+//    }
+//    if (paused) refresh_all_subwindows();
+//    break;
+//
+//  case '[': case '{':
+//    // decrease K_p
+//    if (autopilot_enabled && !landed) {
+//      K_p -= 0.1;
+//      cout << "K_p = " << K_p << endl;
+//    }
+//    if (paused) refresh_all_subwindows();
+//    break;
   // Uncomment to make '<' and '>' change delta instead of stabilized_attitude_angle
 //  case ',': case '<':
 //    // decrease delta
@@ -2292,17 +2271,6 @@ void glut_key (unsigned char k, int x, int y)
 }
 }
 
-void myGlutIdle( void )
-{
-  /* According to the GLUT specification, the current window is
-     undefined during an idle callback.  So we need to explicitly change
-     it if necessary */
-  if ( glutGetWindow() != main_window )
-    glutSetWindow(main_window);
-
-  glutPostRedisplay();
-}
-
 void control_cb( int control )
 {
   switch (control){
@@ -2311,12 +2279,14 @@ void control_cb( int control )
         kh_spinner->enable();
         kp_spinner->enable();
         delta_spinner->enable();
+        circular_checkbox->disable();
         peri_spinner->disable();
         apo_spinner->disable();
       } else {
         kh_spinner->disable();
         kp_spinner->disable();
         delta_spinner->disable();
+        circular_checkbox->enable();
         peri_spinner->enable();
         apo_spinner->enable();
       }
@@ -2324,9 +2294,15 @@ void control_cb( int control )
     case 2:
       break;
     case 3:
-      if (periapsis > apoapsis) {
+      if (periapsis > apoapsis && circular_orbit == 0) {
         error_text->name = "Error: Periapsis < Apoapsis";
         start_button->disable();
+      } else if (periapsis > apoapsis && circular_orbit == 1) {
+        apoapsis = periapsis;
+        error_text->name = "";
+        start_button->enable();
+      } else if (circular_orbit == 1) {
+        apoapsis = periapsis;
       } else {
         error_text->name = "";
         start_button->enable();
@@ -2349,11 +2325,21 @@ void control_cb( int control )
       }
       else refresh_all_subwindows();
       break;
+    case 6:
+      if (circular_orbit == 1) {
+        apo_spinner->disable();
+        apoapsis = periapsis;
+        error_text->name = "";
+        start_button->enable();
+      } else {
+        apo_spinner->enable();
+      }
+      break;
   }
-  
+  glui->sync_live();
   printf( "callback: %d\n", control );
-  printf( "    periapsis spinner: %d\n", peri_spinner->get_int_val() );
-  printf( "     apoapsis spinner: %d\n", apo_spinner->get_int_val() );
+  printf( "    periapsis spinner: %d\n", periapsis ); // peri_spinner->get_int_val()
+  printf( "     apoapsis spinner: %d\n", apoapsis ); // apo_spinner->get_int_val()
   printf( "          radio group: %d\n", radio->get_int_val() );
 }
 
@@ -2364,7 +2350,7 @@ void show_autopilot_controls(bool on) {
     simulation_speed = 0;
     paused = true;
     
-    GLUI *glui = GLUI_Master.create_glui( "Autopilot Setup", 0, 50, 50 ); /* name flags, x, and y */
+    glui = GLUI_Master.create_glui( "Autopilot Setup", 0, 50, 50 ); /* name flags, x, and y */
     
     // Create main panel to hold all the objects
     GLUI_Panel *main_panel = new GLUI_Panel( glui, "", GLUI_PANEL_NONE );
@@ -2390,15 +2376,19 @@ void show_autopilot_controls(bool on) {
     delta_spinner->set_float_limits(0 , 2);
     
     GLUI_Panel *inject_panel = new GLUI_Panel( main_panel, "Orbital Injection Mode           " );
-    peri_spinner = new GLUI_Spinner( inject_panel, "Periapsis(m):", &periapsis, 3, control_cb);
-    peri_spinner->set_w(400);
+    circular_checkbox = new GLUI_Checkbox(inject_panel, "Circular", &circular_orbit, 6, control_cb );
+    peri_spinner = new GLUI_EditText( inject_panel, "Periapsis(m):", &periapsis, 3, control_cb);
+    peri_spinner->set_alignment( GLUI_ALIGN_LEFT );
+    peri_spinner->set_w( 150 );
     peri_spinner->set_int_limits(3486000 , 103386000);
-    apo_spinner = new GLUI_Spinner( inject_panel, "Apoapsis(m):", &apoapsis, 3, control_cb);
-    apo_spinner->set_w(400);
+    apo_spinner = new GLUI_EditText( inject_panel, "Apoapsis(m):", &apoapsis, 3, control_cb);
+    apo_spinner->set_alignment( GLUI_ALIGN_LEFT );
+    apo_spinner->set_w( 150 );
     apo_spinner->set_int_limits(3486000 , 103386000);
     error_text = new GLUI_StaticText( inject_panel, "" );
     
     error_text->name = "";
+    circular_checkbox->disable();
     peri_spinner->disable();
     apo_spinner->disable();
     
@@ -2502,7 +2492,6 @@ int main (int argc, char* argv[])
   glutDisplayFunc(draw_instrument_window);
   glutKeyboardFunc(glut_key);
   glutSpecialFunc(glut_special);
-  glutMouseFunc(instrument_mouse_button);
 
   // Generate the random number table
   srand(0);

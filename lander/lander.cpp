@@ -52,7 +52,6 @@ void autopilot_land (void)
     if (altitude < 200 && ground_speed_wrt_mars > 1) { // wrt
       throttle_horiz = 0.2;
       stabilized_attitude_angle = -atan(throttle_horiz / throttle_vert) * 180 / M_PI;
-      // cout << "vert = " << throttle_vert << "\thoriz = " << throttle_horiz <<  "\tangle = " << stabilized_attitude_angle <<  endl;
     } else {
       throttle_horiz = 0;
     }
@@ -67,12 +66,11 @@ void autopilot_inject(void) {
   fuel_rate_at_max_thrust = 0;
   double target_semi_major = 0.5 * (periapsis + apoapsis);
   double target_eccentricity = 1 - (periapsis/target_semi_major);
-//  double target_ground_speed = sqrt(GRAVITY * MARS_MASS / periapsis);
   
-  cout  << "theta = " << (theta*180/M_PI) << "\te = " << eccentricity << "\ttarget_e = " << target_eccentricity << "\treached_circular = " << reached_circular_orbit << "\treached_final = " << reached_final_orbit << "\tperi = " << r_p << " " << to_string((r_p-periapsis)/periapsis*100) << "\tapo = " << r_a << " " << to_string((r_a-apoapsis)/apoapsis*100) << endl;
+//  cout  << "theta = " << (theta*180/M_PI) << "\te = " << eccentricity << "\ttarget_e = " << target_eccentricity << "\treached_circular = " << reached_circular_orbit << "\treached_final = " << reached_final_orbit << "\tperi = " << r_p << " " << to_string((r_p-periapsis)/periapsis*100) << "\tapo = " << r_a << " " << to_string((r_a-apoapsis)/apoapsis*100) << endl;
 
   if (!reached_circular_orbit && !reached_final_orbit) {
-    if (position.abs() < (periapsis+2587894.3661202100)/1.6883873497) { 
+    if (position.abs() < (periapsis+2587894.3661202100)/1.6883873497) {
       stabilized_attitude_angle = 0;
       throttle = 1;
     } else if ((theta*180/M_PI) < 179 && eccentricity > 0.001) {
@@ -179,7 +177,6 @@ void numerical_dynamics (void)
   theta = acos(cos_theta); // theta in radians!
   if (climb_speed > 0) theta = 2*M_PI - theta;
     
-//  cout << "theta = " << theta*180/M_PI << endl;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled && autopilot_mode == 0) autopilot_land();
