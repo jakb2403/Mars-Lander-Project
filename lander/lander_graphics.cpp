@@ -683,7 +683,7 @@ void draw_instrument_window (void)
   glClear(GL_COLOR_BUFFER_BIT);
 
   // Draw altimeter
-  draw_dial (view_width+GAP-400, INSTRUMENT_HEIGHT/2, altitude, "Altitude", "m");
+  draw_dial (view_width+GAP-400, (INSTRUMENT_HEIGHT/2)+10, altitude, "Altitude", "m");
 
   // Draw auto-pilot lamp
 //  draw_indicator_lamp (view_width+GAP-400, INSTRUMENT_HEIGHT-18, "Auto-pilot off", "Auto-pilot on", autopilot_enabled);
@@ -697,8 +697,8 @@ void draw_instrument_window (void)
   pred_traj_lamp.draw();
   
   // Draw climb rate meter
-  if (climb_speed >= 0.0) draw_dial (view_width+GAP-150, INSTRUMENT_HEIGHT/2, landed ? 0.0 : climb_speed, "Climb rate", "m/s");
-  else draw_dial (view_width+GAP-150, INSTRUMENT_HEIGHT/2, landed ? 0.0 : -climb_speed, "Descent rate", "m/s");
+  if (climb_speed >= 0.0) draw_dial (view_width+GAP-150, (INSTRUMENT_HEIGHT/2)+10, landed ? 0.0 : climb_speed, "Climb rate", "m/s");
+  else draw_dial (view_width+GAP-150, (INSTRUMENT_HEIGHT/2)+10, landed ? 0.0 : -climb_speed, "Descent rate", "m/s");
 
   // Draw attitude stabilizer lamp
 //  draw_indicator_lamp (view_width+GAP-150, INSTRUMENT_HEIGHT-18, "Att. stabilizer off", "Att. stabilizer on", stabilized_attitude, (" | angle=" + to_string(stabilized_attitude_angle).substr(0,4)));
@@ -707,7 +707,9 @@ void draw_instrument_window (void)
   att_stabilizer_lamp.draw();
   
   // Draw ground speed meter
-  draw_dial (view_width+GAP+100, INSTRUMENT_HEIGHT/2, landed ? 0.0 : ground_speed, "Ground speed", "m/s");
+  draw_dial (view_width+GAP+100, (INSTRUMENT_HEIGHT/2)+10, landed ? 0.0 : ground_speed_wrt_mars, "Ground speed (w.r.t. Mars)", "m/s"); // wrt
+  s.str(""); s << "Ground speed (absolute) " << fixed << ground_speed_abs << " m/s";
+  glut_print(view_width+GAP+16, 37, s.str());
 
   // Draw parachute lamp
   indicator_lamp parachute_lamp = indicator_lamp(view_width+GAP+100, INSTRUMENT_HEIGHT-18, "", "", true, 140, 20);
@@ -808,7 +810,7 @@ void draw_instrument_window (void)
       glut_print(view_width+GAP-427, 17, s.str());
       s.str(""); s << "Descent rate at touchdown " << fixed << -climb_speed << " m/s";
       glut_print(view_width+GAP-232, 17, s.str());
-      s.str(""); s << "Ground speed at touchdown " << fixed << ground_speed << " m/s";
+      s.str(""); s << "Ground speed at touchdown " << fixed << ground_speed_wrt_mars << " m/s"; // wrt
       glut_print(view_width+GAP+16, 17, s.str());
     }
   }
@@ -854,7 +856,7 @@ void display_help_arrows (void)
   glPopMatrix();
 
   // Ground speed arrow
-  if ((ground_speed > MAX_IMPACT_GROUND_SPEED) && !landed) {
+  if ((ground_speed_wrt_mars > MAX_IMPACT_GROUND_SPEED) && !landed) { // wrt
     glBegin(GL_LINES);
     glVertex3d(-2.0*s, 0.0, 0.0);
     glVertex3d(-6.0*s, 0.0, 0.0);
@@ -1303,14 +1305,14 @@ void draw_closeup_window (void)
 
   // Update terrain texture/line offsets
   if (simulation_time != last_redraw_time) {
-    terrain_offset_x += cos(terrain_angle*M_PI/180.0) * ground_speed * (simulation_time-last_redraw_time) / (2.0*ground_plane_size);
-    terrain_offset_y += sin(terrain_angle*M_PI/180.0) * ground_speed * (simulation_time-last_redraw_time) / (2.0*ground_plane_size);
+    terrain_offset_x += cos(terrain_angle*M_PI/180.0) * ground_speed_wrt_mars * (simulation_time-last_redraw_time) / (2.0*ground_plane_size);// wrt
+    terrain_offset_y += sin(terrain_angle*M_PI/180.0) * ground_speed_wrt_mars * (simulation_time-last_redraw_time) / (2.0*ground_plane_size);// wrt
     while (terrain_offset_x < 0.0) terrain_offset_x += 1.0;
     while (terrain_offset_x >= 1.0) terrain_offset_x -= 1.0;
     while (terrain_offset_y < 0.0) terrain_offset_y += 1.0;
     while (terrain_offset_y >= 1.0) terrain_offset_y -= 1.0;
-    if (closeup_coords.backwards) ground_line_offset += ground_speed * (simulation_time-last_redraw_time);
-    else ground_line_offset -= ground_speed * (simulation_time-last_redraw_time);
+    if (closeup_coords.backwards) ground_line_offset += ground_speed_wrt_mars * (simulation_time-last_redraw_time); // wrt
+    else ground_line_offset -= ground_speed_wrt_mars * (simulation_time-last_redraw_time); // wrt
     ground_line_offset -= GROUND_LINE_SPACING*((int)ground_line_offset/(int)(GROUND_LINE_SPACING));
     last_redraw_time = simulation_time;
   }
@@ -1469,16 +1471,16 @@ void draw_closeup_window (void)
   // Work out drag on lander - if it's high, we will surround the lander with an incandescent glow. Also
   // work out drag on parachute: if it's zero, we will not draw the parachute fully open behind the lander.
   // Assume high Reynolds number, quadratic drag = -0.5 * rho * v^2 * A * C_d
-  lander_drag = 0.5*DRAG_COEF_LANDER*atmospheric_density(position)*M_PI*LANDER_SIZE*LANDER_SIZE*velocity_from_positions.abs2();
-  chute_drag = 0.5*DRAG_COEF_CHUTE*atmospheric_density(position)*5.0*2.0*LANDER_SIZE*2.0*LANDER_SIZE*velocity_from_positions.abs2();
+  lander_drag = 0.5*DRAG_COEF_LANDER*atmospheric_density(position)*M_PI*LANDER_SIZE*LANDER_SIZE*velocity_wrt_atm.abs2();
+  chute_drag = 0.5*DRAG_COEF_CHUTE*atmospheric_density(position)*5.0*2.0*LANDER_SIZE*2.0*LANDER_SIZE*velocity_wrt_atm.abs2();
 
   // Draw the lander's parachute - behind the lander in the direction of travel
   if ( (parachute_status == DEPLOYED) && !crashed ) {
-    if (velocity_from_positions.abs() < SMALL_NUM) {
+    if (velocity_wrt_atm.abs() < SMALL_NUM) {
       // Lander is apparently stationary - so draw the parachute above and near to the lander
       gs = 0.0; cs = -1.0; tmp = 2.0;
     } else {
-      gs = ground_speed; cs = climb_speed;
+      gs = ground_speed_wrt_mars; cs = climb_speed; // abs
       if (chute_drag) tmp = 5.0; // parachute fully open
       else tmp = 2.0; // parachute not fully open
     }
@@ -1526,12 +1528,12 @@ void draw_closeup_window (void)
   glPopMatrix(); // back to the world coordinate system
 
   // Draw incandescent glow surrounding lander
-  if (lander_drag*velocity_from_positions.abs() > HEAT_FLUX_GLOW_THRESHOLD) {
+  if (lander_drag*velocity_wrt_atm.abs() > HEAT_FLUX_GLOW_THRESHOLD) {
     // Calculate an heuristic "glow factor", in the range 0 to 1, for graphics effects
-    glow_factor = (lander_drag*velocity_from_positions.abs()-HEAT_FLUX_GLOW_THRESHOLD) / (4.0*HEAT_FLUX_GLOW_THRESHOLD);
+    glow_factor = (lander_drag*velocity_wrt_atm.abs()-HEAT_FLUX_GLOW_THRESHOLD) / (4.0*HEAT_FLUX_GLOW_THRESHOLD);
     if (glow_factor > 1.0) glow_factor = 1.0;
     glow_factor *= 0.7 + 0.3*randtab[rn]; rn = (rn+1)%N_RAND; // a little random variation for added realism
-    glRotated((180.0/M_PI)*atan2(climb_speed, ground_speed), 0.0, 0.0, 1.0);
+    glRotated((180.0/M_PI)*atan2(climb_speed, ground_speed_wrt_mars), 0.0, 0.0, 1.0); // abs
     glRotated(-90.0, 0.0, 1.0, 0.0);
     glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
@@ -1600,10 +1602,10 @@ bool safe_to_deploy_parachute (void)
   double drag;
 
   // Assume high Reynolds number, quadratic drag = -0.5 * rho * v^2 * A * C_d
-  drag = 0.5*DRAG_COEF_CHUTE*atmospheric_density(position)*5.0*2.0*LANDER_SIZE*2.0*LANDER_SIZE*velocity_from_positions.abs2();
+  drag = 0.5*DRAG_COEF_CHUTE*atmospheric_density(position)*5.0*2.0*LANDER_SIZE*2.0*LANDER_SIZE*velocity_wrt_atm.abs2();
   // Do not use the global variable "altitude" here, in case this function is called from within the
   // numerical_dynamics function, before altitude is updated in the update_visualization function
-  if ((drag > MAX_PARACHUTE_DRAG) || ((velocity_from_positions.abs() > MAX_PARACHUTE_SPEED) && ((position.abs() - MARS_RADIUS) < EXOSPHERE))) return false;
+  if ((drag > MAX_PARACHUTE_DRAG) || ((velocity_wrt_atm.abs() > MAX_PARACHUTE_SPEED) && ((position.abs() - MARS_RADIUS) < EXOSPHERE))) return false;
   else return true;
 }
 
@@ -1612,8 +1614,8 @@ void update_visualization (void)
   // speed from current and previous positions. Updates throttle and fuel levels, then redraws all subwindows.
 {
   static vector3d last_track_position;
-  vector3d av_p, d;
-  double a, b, c, mu;
+  vector3d av_p, d, planet_unit;
+  double a, b, c, mu, omega, sine_theta;
 
   simulation_time += delta_t;
   altitude = position.abs() - MARS_RADIUS;
@@ -1623,7 +1625,11 @@ void update_visualization (void)
   if (delta_t != 0.0) velocity_from_positions = (position - last_position)/delta_t;
   else velocity_from_positions = vector3d(0.0, 0.0, 0.0);
   climb_speed = velocity_from_positions*av_p;
-  ground_speed = (velocity_from_positions - climb_speed*av_p).abs();
+  ground_speed_abs = (velocity_from_positions - climb_speed*av_p).abs();
+  omega = 2*M_PI / MARS_DAY;
+  sine_theta = (position^vector3d(0,0,1)).abs() / position.abs();
+  planet_unit = (vector3d(0,0,1) ^ vector3d(position.x, position.y, 0)).norm();
+  ground_speed_wrt_mars = ((velocity_from_positions - climb_speed*av_p) - (omega * MARS_RADIUS * sine_theta * planet_unit)).abs();
 
   // Check to see whether the lander has landed
   if (altitude < LANDER_SIZE/2.0) {
@@ -1638,8 +1644,9 @@ void update_visualization (void)
     simulation_time -= (1.0-mu)*delta_t;
     altitude = LANDER_SIZE/2.0;
     landed = true;
-    if ((fabs(climb_speed) > MAX_IMPACT_DESCENT_RATE) || (fabs(ground_speed) > MAX_IMPACT_GROUND_SPEED)) crashed = true;
+    if ((fabs(climb_speed) > MAX_IMPACT_DESCENT_RATE) || (fabs(ground_speed_wrt_mars) > MAX_IMPACT_GROUND_SPEED)) crashed = true; // wrt
     velocity_from_positions = vector3d(0.0, 0.0, 0.0);
+    velocity_wrt_atm = vector3d(0.0, 0.0, 0.0);
   }
 
   // Update throttle and fuel (throttle might have been adjusted by the autopilot)
@@ -1677,13 +1684,10 @@ void attitude_stabilization (void)
 {
   vector3d up, left, out, perp;
   double m[16];
-  srand(time(NULL));
   
   perp = (position ^ velocity).norm();
-//  cout << perp.abs() << "\t" << to_string(asin(perp.abs() / (position.abs() * velocity.abs()))) << endl;
   if (asin(perp.abs() / (position.abs() * velocity.abs())) < 0.0001 && autopilot_mode == 1) {
     if (scenario ==3) {
-//      perp = (vector3d((rand() % 100 + 1),(rand() % 100 + 1),(rand() % 100 + 1)) ^ position).norm();
       perp = (vector3d(97,53,46) ^ position).norm();
     } else {
       perp = vector3d(0, 0, 1);
@@ -1817,7 +1821,7 @@ void reset_simulation (void)
   p = position.norm();
   climb_speed = velocity_from_positions*p;
   tv = velocity_from_positions - climb_speed*p;
-  ground_speed = tv.abs();
+  ground_speed_wrt_mars = tv.abs();
 
   // Miscellaneous state variables
   throttle_control = (short)(throttle*THROTTLE_GRANULARITY + 0.5);

@@ -14,8 +14,8 @@
             filePath = "lander/lander_graphics.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1031"
-            endingLineNumber = "1031"
+            startingLineNumber = "1033"
+            endingLineNumber = "1033"
             landmarkName = "draw_orbital_window()"
             landmarkType = "9">
          </BreakpointContent>
@@ -62,8 +62,8 @@
             filePath = "lander/lander_graphics.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "712"
-            endingLineNumber = "712"
+            startingLineNumber = "714"
+            endingLineNumber = "714"
             landmarkName = "draw_instrument_window()"
             landmarkType = "9">
          </BreakpointContent>

@@ -49,7 +49,7 @@ void autopilot_land (void)
       throttle_vert = 1;
     }
 
-    if (altitude < 200 && ground_speed > 1) {
+    if (altitude < 200 && ground_speed_wrt_mars > 1) { // wrt
       throttle_horiz = 0.2;
       stabilized_attitude_angle = -atan(throttle_horiz / throttle_vert) * 180 / M_PI;
       // cout << "vert = " << throttle_vert << "\thoriz = " << throttle_horiz <<  "\tangle = " << stabilized_attitude_angle <<  endl;
@@ -107,15 +107,19 @@ void numerical_dynamics (void)
   // INSERT YOUR CODE HERE
   // Define varibles for use in trajectory prediction
   double theta_dot;
-    
+  double omega = 2*M_PI / MARS_DAY;
+  double sine_theta = (position^vector3d(0,0,1)).abs() / position.abs();
+  vector3d planet_unit = (vector3d(0,0,1) ^ vector3d(position.x, position.y, 0)).norm();
+  velocity_wrt_atm = (velocity - (omega * position.abs() * sine_theta * planet_unit));
+      
   // Calculate current mass of lander with fuel
   tot_mass = UNLOADED_LANDER_MASS + (fuel * FUEL_CAPACITY * FUEL_DENSITY);
   
   // Calculate drag force on the lander and the parachute if it is deployed
-  drag_force_lander = -0.5 * atmospheric_density(position) * DRAG_COEF_LANDER * (M_PI * pow(LANDER_SIZE, 2)) * pow(velocity.abs(), 2) * velocity.norm();
+  drag_force_lander = -0.5 * atmospheric_density(position) * DRAG_COEF_LANDER * (M_PI * pow(LANDER_SIZE, 2)) * pow(velocity_wrt_atm.abs(), 2) * velocity_wrt_atm.norm();
   drag_force_chute = vector3d(0,0,0);
   if (parachute_status == DEPLOYED) {
-    drag_force_chute = -0.5 * atmospheric_density(position) * DRAG_COEF_CHUTE * (5 * pow((2*LANDER_SIZE) , 2)) * pow(velocity.abs(), 2) * velocity.norm();
+    drag_force_chute = -0.5 * atmospheric_density(position) * DRAG_COEF_CHUTE * (5 * pow((2*LANDER_SIZE) , 2)) * pow(velocity_wrt_atm.abs(), 2) * velocity_wrt_atm.norm();
   }
   
   // Calculate gravitational force
