@@ -1032,11 +1032,9 @@ void draw_orbital_window (void)
   if (show_pred_traj) {
     // Draw predicted trajectory (not accounting for air resistance)
     vector3d perp, current_colour;
-    double theta, cos_theta, current_point_drag, current_point_velocity;
+    double current_point_drag, current_point_velocity;
     
-    cos_theta = ((ang_momentum.abs2()/(pow(tot_mass, 2) * (GRAVITY * MARS_MASS) * position.abs())) - 1) / eccentricity;
-    theta = acos(cos_theta); // theta in radians!
-    if (climb_speed > 0) theta = 2*M_PI - theta;
+    
     
     perp = (position ^ velocity).norm();
     major_unit = cos(theta) * position.norm() + sin(theta) * (perp ^ position.norm()) + (1 - cos(theta)) * (perp * position.norm()) * perp;
@@ -1801,7 +1799,8 @@ void reset_simulation (void)
   stabilized_attitude_angle = 0;
   throttle = 0.0;
   fuel = 1.0;
-
+  autopilot_mode = 0;
+  
   // Restore initial lander state
   initialize_simulation();
 

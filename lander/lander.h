@@ -219,7 +219,7 @@ unsigned long long time_program_started;
 // Lander state - the visualization routines use velocity_from_positions, so not sensitive to
 // any errors in the velocity update in numerical_dynamics
 vector3d position, orientation, velocity, velocity_from_positions, last_position, previous_position, drag_force_lander, drag_force_chute, grav_force, acceleration, major_unit, minor_unit, ang_momentum, velocity_wrt_atm;
-double climb_speed, ground_speed_wrt_mars, ground_speed_abs, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p, r_a;
+double climb_speed, ground_speed_wrt_mars, ground_speed_abs, altitude, throttle, fuel, eccentricity, semi_major, semi_minor, orbit_energy, stabilized_attitude_angle, tot_mass, r_p, r_a, theta, cos_theta;
 int periapsis = MARS_RADIUS+100000,apoapsis = MARS_RADIUS+100000;
 int autopilot_mode = 0;
 bool stabilized_attitude, autopilot_enabled, parachute_lost, show_pred_traj, reached_circular_orbit, reached_final_orbit;
@@ -259,7 +259,7 @@ GLfloat straight_on[] = { 0.0, 0.0, 1.0, 0.0 };
 #else // extern declarations of those global variables used in lander.cpp
 
 extern bool stabilized_attitude, autopilot_enabled, reached_circular_orbit, reached_final_orbit;
-extern double delta_t, simulation_time, throttle, fuel, altitude, ground_speed_wrt_mars, ground_speed_absw, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor, r_p, r_a, orbit_energy;
+extern double delta_t, simulation_time, throttle, fuel, altitude, ground_speed_wrt_mars, ground_speed_absw, climb_speed, stabilized_attitude_angle, tot_mass, eccentricity, semi_major, semi_minor, r_p, r_a, orbit_energy, theta, cos_theta;
 extern short simulation_speed;
 extern float K_h, K_p, delta;
 extern int autopilot_mode, periapsis, apoapsis;

@@ -69,27 +69,44 @@ void autopilot_inject(void) {
   double target_eccentricity = 1 - (periapsis/target_semi_major);
 //  double target_ground_speed = sqrt(GRAVITY * MARS_MASS / periapsis);
   
-  cout << "e = " << eccentricity << "\ttarget_e = " << target_eccentricity << "\treached_circular = " << reached_circular_orbit << "\treached_final = " << reached_final_orbit << endl;
-//  cout << "e = " << eccentricity << "\tr_p = " << to_string(r_p-MARS_RADIUS) << "\tmed = " << to_string(((r_p+r_a)/2)-MARS_RADIUS) << "\tr_a = " << to_string(r_a-MARS_RADIUS) << "\tpercentage diff = " << to_string(((r_a-r_p)/r_p)*100) << "\tr = " << to_string(altitude) <<endl;
+  cout  << "theta = " << (theta*180/M_PI) << "\te = " << eccentricity << "\ttarget_e = " << target_eccentricity << "\treached_circular = " << reached_circular_orbit << "\treached_final = " << reached_final_orbit << "\tperi = " << r_p << " " << to_string((r_p-periapsis)/periapsis*100) << "\tapo = " << r_a << " " << to_string((r_a-apoapsis)/apoapsis*100) << endl;
+
   if (!reached_circular_orbit && !reached_final_orbit) {
-    if (eccentricity > 0.97 && position.abs() < (periapsis+2505579.999998770)/1.73) {
-      stabilized_attitude_angle = -15;
+    if (position.abs() < (periapsis+2587894.3661202100)/1.6883873497) { 
+      stabilized_attitude_angle = 0;
       throttle = 1;
-    } else if (eccentricity > 0.001 && climb_speed >  0) {
-      stabilized_attitude_angle = -90 + atan(control_function(climb_speed, 0, 1, 3, 0)/(eccentricity))*180/M_PI;
+    } else if ((theta*180/M_PI) < 179 && eccentricity > 0.001) {
+      stabilized_attitude_angle = 0;
+      throttle = 1;
+    } else if ((theta*180/M_PI) >= 179 && (theta*180/M_PI) <= 181 && eccentricity > 0.001) {
+      stabilized_attitude_angle = 90;
+      throttle = 1;
+    } else if ((theta*180/M_PI) > 181 && eccentricity > 0.001) {
+      stabilized_attitude_angle = 180;
       throttle = 1;
     } else {
       stabilized_attitude_angle = 0;
       throttle = 0;
       reached_circular_orbit = true;
     }
+//    if (eccentricity > 0.97 && position.abs() < periapsis) { // 2505579.999998770
+//      stabilized_attitude_angle = 15;
+//      throttle = 1;
+//    } else if (eccentricity > 0.001 && climb_speed >  0) {
+//      stabilized_attitude_angle = 90 - atan(control_function(climb_speed, 0, 1, 3, 0)/(eccentricity))*180/M_PI;
+//      throttle = 1;
+//    } else {
+//      stabilized_attitude_angle = 0;
+//      throttle = 0;
+//      reached_circular_orbit = true;
+//    }
   } else if (periapsis == apoapsis && reached_circular_orbit) {
     stabilized_attitude_angle = 0;
     throttle = 0;
     reached_final_orbit = true;
   } else if (reached_circular_orbit && !reached_final_orbit) {
     if (eccentricity < target_eccentricity) {
-      stabilized_attitude_angle = -90;
+      stabilized_attitude_angle = 90;
       throttle = 1;
     } else {
       reached_final_orbit = true;
@@ -157,6 +174,12 @@ void numerical_dynamics (void)
   semi_minor = semi_major * sqrt(1 - pow(eccentricity, 2)); // b on the elipse diagram
   r_a = 2*semi_major - r_p;
 
+  
+  cos_theta = ((ang_momentum.abs2()/(pow(tot_mass, 2) * (GRAVITY * MARS_MASS) * position.abs())) - 1) / eccentricity;
+  theta = acos(cos_theta); // theta in radians!
+  if (climb_speed > 0) theta = 2*M_PI - theta;
+    
+//  cout << "theta = " << theta*180/M_PI << endl;
   
   // Here we can apply an autopilot to adjust the thrust, parachute and attitude
   if (autopilot_enabled && autopilot_mode == 0) autopilot_land();
